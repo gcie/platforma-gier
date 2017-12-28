@@ -18,6 +18,13 @@ class Square {
     }
 }
 
+var game = {
+    width: 8,
+    height: 8,
+    squares: [],
+    
+}
+
 class Game {
     constructor(width, height) {
         this.width = width ? width: 8;
@@ -62,6 +69,14 @@ class Game {
             return this.square[y * this.width + x].content;
         else
             return undefined;
+    }
+
+    getPieceMoves(x, y) {
+        if(this.square[y * this.width + x] && this.square[y * this.width + x].content) {
+            return this.square[y * this.width + x].content.getFirstMoves();
+        } else
+            return undefined;
+
     }
 
     executeMove(move) {

@@ -1,31 +1,36 @@
 //var game = new Game(8, 8);
+
+var game = new Game(8, 8);
+var board;
+var pieces = [];
+var count = 0;
+
+function set_piece(piece) {
+    var marks = board.getElementsByClassName('last-move');
+    marks[0].
+    game.getPiece
+
+}
+
 function init() {
 
     var game = new Game(8, 8);
-    game.internationalDraugths();
+    var board;
     var pieces = [];
     var count = 0;
-    var board = document.getElementById('board');
+    
+    game.internationalDraugths();
+    board = document.getElementById('board');
 
     for(var i = 0; i < 64; i++) {
         if (game.square[i].content) {
             pieces[count] = document.createElement('piece');
-            if(game.square[i].content.color == true) {
-                if(game.square[i].content.promoted == true) {
-                    pieces[count].className = 'white-king';
-                } else {
-                    pieces[count].className = 'white-man';                    
-                }
-            } else {
-                if(game.square[i].content.promoted == true) {
-                    pieces[count].className = 'black-king';
-                } else {
-                    pieces[count].className = 'black-man';   
-                }
-            }
+
+            pieces[count].className = 
+                (game.square[i].content.color ? 'white-' : 'black-') + 
+                (game.square[i].content.promoted ? 'king' : 'man')
             pieces[count].style.transform = `translate(${game.square[i].content.square.posX * 64}px, ${game.square[i].content.square.posY * 64}px)`;
-            console.log(`translate(${game.square[i].content.square.posX * 64}px, ${game.square[i].content.square.posY * 64}px)`);
-            console.log(pieces[count]);
+            set_piece(pieces[count]);
             board.appendChild(pieces[count]);
             count ++;
         }

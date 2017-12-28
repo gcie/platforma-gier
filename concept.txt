@@ -1,0 +1,13 @@
+Logowanie:
+    //todo
+
+Lobby:
+    //todo
+    
+Gra:
+    - użytkownik zakłada stół w lobby - otrzymuje unikalny numer stołu
+    - inny użytkownik znajduje pokój / łączy się z pokojem przez lobby
+    - dla każdego użytkownika generowany jest identyfikator (w przypadku gracza zarejestrowanego - zapisywany w profilu, w przypadku gracza anonimowego - zapisywany w ciasteczkach [aby móc się potem połączyć]), za pomocą którego będzie mógł łączyć się z otwartym pokojem z drugim graczem
+    - link do stołu jest postaci /game?id=41b47c79e9ae (id=numer stołu)
+    - gra polega na wymianie między użytkownikami a serwerem plików ruchów (podpisywanych identyfikatorem gracza), sprawdzanych przez serwer pod względem poprawności
+    - serwer łączy się z graczami za pomocą socketów i wymienia w ten sposób pliki ruchów (i pliki gry)
