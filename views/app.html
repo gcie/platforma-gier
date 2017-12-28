@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <script>
+    window.addEventListener('load', function() {
+        
+        var btClick = document.getElementById('btClick');
+
+        btClick.addEventListener('click', function() {
+
+            var req = new XMLHttpRequest();
+            req.open('post', '/post', true);
+            req.onreadystatechange = function() {
+                if(req.readyState == XMLHttpRequest.DONE) {
+                    var content1 = document.getElementById('content1');
+                    
+                    content1.innerHTML = req.responseText;
+                }
+
+            };
+
+            var form = new FormData();
+            form.append('k', 'v');
+            form.append('k2', 'v2');
+            req.send(form);
+        })
+
+    });
+    </script>
+</head>
+<body>
+    <input id='argument' type='text'></input>
+    <div id='content1'>oryginalna zawartość</div>
+    <button id='btClick'>Hello there!</button>
+</body>
+</html>

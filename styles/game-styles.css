@@ -1,0 +1,41 @@
+.board10 {
+    background-image: url("../img/board10.png");
+    width: 640px;
+    height: 640px;
+    position: relative;
+}
+
+.board8 {
+    background-image: url("../img/board10.png");
+    width: 512px;
+    height: 512px;
+    position: relative;
+}
+
+.board10 piece, .board8 piece {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 12.5%;
+    height: 12.5%;
+}
+
+.black-king {
+    background-image: url("../img/black_king.png");
+}
+
+.black-man {
+    background-image: url("../img/black_man.png");
+}
+
+.white-king {
+    background-image: url("../img/white_king.png");
+}
+
+.white-man {
+    background-image: url("../img/white_man.png");
+}
+
+.last-move {
+    background-color: rgba(155,199,0,0.41);
+}
