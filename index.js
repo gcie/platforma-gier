@@ -22,6 +22,14 @@ app.use('/styles', express.static('styles'));
 app.use('/img', express.static('img'));
 app.use('/scripts', express.static('scripts'));
 
+var server = http.createServer(app);
+var io = require('socket.io')(server);
+
+
+app.get('/table/:id', (req, res) => {
+    res.render('table');
+});
+
 app.get('/', (req, res) => {
     res.render('app');
 });
@@ -34,8 +42,44 @@ app.post('/post', (req, res) => {
     res.end(`z serwera ${new Date().toLocaleTimeString()}`);
 })
 
-http
-    .createServer(app)
-    .listen(3000);
+server.listen(3000);
 
 console.log("Server started!");
+
+var tables = io.of('/table');
+
+/**
+ *  When user connects to the 'tables' socket through:
+ *      var socket = io('/table');
+ *  he calls this function below with his socket
+ */
+tables.on('connection', function(socket) { // TODO
+
+    socket.on('create-table', function(id, data) { // TODO
+        /**
+         * assign new table.
+         * id - uniqe identifier for each user, so when an annymous
+         *  user connects, we will use this as his identifier
+         * data - data of created table, and identification info
+         *  about the user: anonymous / registered
+         */
+        var table_id; // TODO
+        socket.join(table_id); // joining created table
+        socket.emit('table-id', table_id); // sending table id to it's creator
+    });
+
+    socket.on('join-table', function(id, data) {
+        /**
+         * join chosen table.
+         * id - as above
+         * data - table data and userdata
+         */
+        socket.join(data.table_id);
+    });
+
+    socket.on('disconnect', function() {
+        /**
+         * destroy tables etc.
+         */
+    });
+})
