@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <script>
+    function joinTable(tableId) {
+        console.log(tableId);   
+    }
+    </script>
+    <title>Document</title>
+</head>
+<body>
+    <table>
+        <tr>
+            <th>Hostname</th>
+            <th>Game type</th>
+            <th></th>
+        </tr>
+        <% for(var table in locals.tables_data) { %>
+            <tr>
+                <td>
+                    <%= locals.tables_data[table].hostname %>
+                </td>
+                <td>
+                    <%= locals.tables_data[table].gametype %>
+                </td>
+                <td>
+                    <button onclick="joinTable( '<%= locals.tables_data[table].id %>' )">Join</button>
+                </td>
+            </tr>
+        <% } %>
+    </table>
+</body>
+</html>

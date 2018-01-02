@@ -25,9 +25,26 @@ app.use('/scripts', express.static('scripts'));
 var server = http.createServer(app);
 var io = require('socket.io')(server);
 
+var tables_data = {
+    table1: {
+        hostname: 'Rambo',
+        gametype: 'Classic 8x8',
+        id: 'gd713edg8diyqwd87ydeqw'
+    },
+    table2: {
+        hostname: 'Anthony',
+        gametype: 'Classic 10x10',
+        id: 'fh38cn08equ0hdq308uewcx'
+    }
+};
 
 app.get('/table/:id', (req, res) => {
     res.render('table');
+});
+
+
+app.get('/tables', (req, res) => {
+    res.render('tables', {tables_data});
 });
 
 app.get('/', (req, res) => {
@@ -73,6 +90,8 @@ tables.on('connection', function(socket) { // TODO
          * join chosen table.
          * id - as above
          * data - table data and userdata
+         * 
+         * delete the table from database to prevent anyone from connecting to it
          */
         socket.join(data.table_id);
     });
