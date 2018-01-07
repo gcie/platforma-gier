@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+    <script>
+        window.onload = function() {
+            var socket = io('/table');
+
+            document.getElementById("b").addEventListener("click", function() {
+                socket.emit('create-table', {
+                    table_name: document.getElementById("m").value,
+                    foo: function(x) {
+                        return x * x;
+                    },
+                    bar: 5
+                });
+            });
+        }
+    </script>
+    <title>Document</title>
+</head>
+<body>
+    
+    <ul id="messages"></ul>
+    <input id="m" autocomplete="off" /><button id="b">Send</button>
+</body>
+</html>

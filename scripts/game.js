@@ -1,5 +1,9 @@
 //var game = new Game(8, 8);
 
+
+
+
+
 var game = new Game(8, 8);
 var board;
 var pieces = [];

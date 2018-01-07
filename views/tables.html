@@ -32,5 +32,32 @@
             </tr>
         <% } %>
     </table>
+    </br>
+    <form method="POST">
+        <table>
+            <tr>
+                <td colspan=2>
+                    <div align="center">Nowy stół:</div>
+                </td>
+            </tr>
+            <tr>
+                <th>Rodzaj gry:</th>
+                <td>
+                    <select name="game_type">
+                        <option value="classic8x8">Classic 8x8</option>
+                        <option value="classic10x10">Classic 10x10</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td colspan=2>
+                    <div align="center">
+                        <input type="submit", name="new_table">
+                    </div>
+                </td>
+            </tr>
+        </table>
+        <input type="text", name="wololo">
+    </form>
 </body>
 </html>

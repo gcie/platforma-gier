@@ -9,6 +9,7 @@
 const http = require('http');
 const ejs = require('ejs');
 const express = require('express'); 
+
 //const checkers = require('./checkers.js');
 
 var app = express();
@@ -22,30 +23,45 @@ app.use('/styles', express.static('styles'));
 app.use('/img', express.static('img'));
 app.use('/scripts', express.static('scripts'));
 
+app.use(express.urlencoded({extended: true})); // żeby przekazywać parametry POST request
+
 var server = http.createServer(app);
 var io = require('socket.io')(server);
 
 var tables_data = {
     table1: {
-        hostname: 'Rambo',
-        gametype: 'Classic 8x8',
-        id: 'gd713edg8diyqwd87ydeqw'
+        hostname: 'Rambo', // nazwa użytkownika hosta
+        gametype: 'Classic 8x8', // rodzaj gry
+        id: 'gd713edg8diyqwd87ydeqw' // unikalne id stołu
     },
     table2: {
-        hostname: 'Anthony',
+        hostname: 'xxX_69Anthony69_Xxx',
         gametype: 'Classic 10x10',
         id: 'fh38cn08equ0hdq308uewcx'
     }
 };
 
-app.get('/table/:id', (req, res) => {
-    res.render('table');
+app.get('/tables/:id/join', (req, res) => {
+    // join a table 
+    // req.params.id - table's ID
+    res.end();
 });
 
+app.get('/tables/:id', (req, res) => {
+    // spectate a table 
+    // req.params.id - table's ID
+    res.end();
+});
 
 app.get('/tables', (req, res) => {
     res.render('tables', {tables_data});
 });
+
+app.post('/tables', (req, res) => {
+    // create a table
+    res.write('creating table: ' + req.body.game_type);
+    res.end();
+})
 
 app.get('/', (req, res) => {
     res.render('app');
