@@ -8,23 +8,15 @@
     <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
     <script>
         window.onload = function() {
-            var socket = io('/table');
-
             document.getElementById("b").addEventListener("click", function() {
-                socket.emit('create-table', {
-                    table_name: document.getElementById("m").value,
-                    foo: function(x) {
-                        return x * x;
-                    },
-                    bar: 5
-                });
+                
             });
         }
     </script>
     <title>Document</title>
 </head>
 <body>
-    
+    <div id="f"></div>
     <ul id="messages"></ul>
     <input id="m" autocomplete="off" /><button id="b">Send</button>
 </body>

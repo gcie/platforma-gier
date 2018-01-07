@@ -4,15 +4,38 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <script src="/socket.io/socket.io.js"></script>
     <script>
-    function joinTable(tableId) {
-        console.log(tableId);   
-    }
+        var socket = io.of('/tables');
+
+        socket.on('update-list', function(data) {
+            buildTable(data);
+        });
+
+        function joinTable(tableId) {
+            var req = new XMLHttpRequest();
+            req.open('post', '/join/' + tableId);
+            req.onreadystatechange = function() {
+                if ( req.readyState == XMLHttpRequest.DONE ) {
+                    
+                }
+            }
+            socket.emit()
+        }
+
+        function buildTable(data) {
+            var res = "<tr><th>Hostname</th><th>Game type</th><th></th></tr>";
+            for(var row in data) {
+                res += "<tr><td>" + row.hostname + "</td><td>" + row.gametype + "</td><td>" + 
+                    "<button onclick='joinTable(" + row.tableId + ")'>Join</button>"
+            }
+        }
+
     </script>
     <title>Document</title>
 </head>
 <body>
-    <table>
+    <table id='tables'>
         <tr>
             <th>Hostname</th>
             <th>Game type</th>

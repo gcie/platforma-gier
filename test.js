@@ -29,7 +29,7 @@ var server = http.createServer(app);
 var io = require('socket.io')(server);
 
 app.get('/', (req, res) => {
-    res.render('test');
+    res.render('test', {foo: 'qwertyuiop'});
 });
 
 server.listen(3000);
@@ -62,3 +62,8 @@ tables.on('connection', function(socket) { // TODO
         console.log(socket.id + ' disconnected.');
     });
 })
+
+var f = require('./js/token.js');
+
+console.log(f());
+console.log(f());

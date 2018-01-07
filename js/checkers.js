@@ -1,92 +1,169 @@
-/**
- * funkcja inicjalizująca obiekt gry, wysyłany z serwera
- * 
- * @param {int} width - Board's width
- * @param {int} height - Board's height
- * @param {int} rows - Number of rows filled with pieces
- */
-function internationalDraughts(width, height, rows) {
-    var draughts = {
-        /**
-         * color:
-         *      true: white (flip coords),
-         *      false: black
-         */
-        width: 8,
-        height: 8,
-        rows: 3,
 
-        piece_count: 0,
+class Game {
+    constructor(width, height, rows) {
+        this.width = width ? width : 8;
+        this.height = height ? height : 8;
+        this.rows = rows ? rows : 3;
 
-        pieces: [],
-        
-        current_turn: true, // white starts
+        this.pieceCount = 0;
+        this.pieces = [];
 
-        promotionZone: function(color, x, y) {
-            return color ? y == height - 1 : y == 0;
-        },
-        moves: function(color, prmoted) {
-            if(promoted) {
-                return function*() {
-                    yield [true, -1, -1];
-                    yield [true, -1,  1];
-                    yield [true,  1, -1];
-                    yield [true,  1,  1];    
-                }
-            } else if(color) {
-                return function*() {
-                    yield [false,  1, 1];
-                    yield [false, -1, 1];
-                };
-            } else {
-                return function*() {
-                    yield [false, -1, -1];
-                    yield [false,  1, -1];
-                }
+        // game main parameters
+        this.starts = true; // white
+        this.flyingKings = true;
+        this.backwardCapture = true;
+        this.mandatoryCapture = true;
+        this.fullCapture = true;
+        this.droppingPieces = false;
+        this.promotionOnTheFly = false;
+
+        this.currentTurn = this.starts;
+
+        // Set up pieces
+        for(var i = 0; i < this.rows; i++)
+        for(var j = 0; j < this.width; j++)
+        if (i % 2 != j % 2)
+            this.pieces[this.pieceCount++] = {
+                color: true, // white
+                x: j,
+                y: i,
+                promoted: false
             }
-        },
-        captures: function(color, promoted) {
-            return function*() {
-                yield [promoted, -1, -1];
-                yield [promoted, -1,  1];
-                yield [promoted,  1, -1];
-                yield [promoted,  1,  1]; 
+        for(var i = this.height - this.rows; i < this.height; i++) 
+        for(var j = 0; j < this.width; j++) 
+        if (i % 2 != j % 2) 
+            this.pieces[this.pieceCount++] = {
+                color: false, // black
+                x: j,
+                y: i,
+                promoted: false
             }
-        },
-    };
+    }
 
-    // Set up main properties
-    draugths.width = width ? width : 8;
-    draugths.height = height ? height : 8;
-    draugths.rows = rows ? rows : 3;
-    draugths.pieces = [];
-    draugths.piece_count = 0;
+    classic() {
+        this.starts = true; // white
+        this.flyingKings = true;
+        this.backwardCapture = true;
+        this.mandatoryCapture = true;
+        this.fullCapture = true;
+        this.droppingPieces = false;
+        this.promotionOnTheFly = false;
+    }
 
-    // Set up pieces
-    for(var i = 0; i < draugths.rows; i++)
-    for(var j = 0; j < draugths.width; j++)
-    if (i % 2 != j % 2)
-        draugths.pieces[draugths.piece_count++] = {
-            color: true, // white
-            x: j,
-            y: i,
-            promoted: false
-        }
-    for(var i = draugths.height - draugths.rows; i < draugths.height; i++) 
-    for(var j = 0; j < draugths.width; j++) 
-    if (i % 2 != j % 2) 
-        draugths.pieces[draugths.piece_count++] = {
-            color: false, // black
-            x: j,
-            y: i,
-            promoted: false
-        }
+    pool() {
+        this.starts = true; // white
+        this.flyingKings = true;
+        this.backwardCapture = true;
+        this.mandatoryCapture = false;
+        this.fullCapture = true;
+        this.droppingPieces = false;
+        this.promotionOnTheFly = false;
+    }
+
+    russian() {
+        this.starts = true; // white
+        this.flyingKings = true;
+        this.backwardCapture = true;
+        this.mandatoryCapture = true;
+        this.fullCapture = true;
+        this.droppingPieces = false;
+        this.promotionOnTheFly = true;
+    }
+
+    english() {
+        this.starts = true; // white
+        this.flyingKings = false;
+        this.backwardCapture = false;
+        this.mandatoryCapture = false;
+        this.fullCapture = true;
+        this.droppingPieces = false;
+        this.promotionOnTheFly = false;
+    }
+
+    toJSON() {
+        return {
+            width: this.width,
+            height: this.height,
+            rows: this.rows,
     
-    return draughts;
+            pieceCount: this.pieceCount,
+            pieces: this.pieces,
+    
+            // game main parameters
+            starts: this.starts,
+            flyingKings: this.flyingKings,
+            backwardCapture: this.backwardCapture,
+            mandatoryCapture: this.mandatoryCapture,
+            fullCapture: this.fullCapture,
+            droppingPieces: this.droppingPieces,
+            promotionOnTheFly: this.promotionOnTheFly,
+    
+            currentTurn: this.currentTurn
+        }
+    }
+}
+
+function moves(game, color, promoted) {
+    if(promoted) {
+        return function*() {
+            yield [game.flyingKings, -1, -1];
+            yield [game.flyingKings, -1,  1];
+            yield [game.flyingKings,  1, -1];
+            yield [game.flyingKings,  1,  1];    
+        }
+    } else if(color) {
+        return function*() {
+            yield [false,  1, 1];
+            yield [false, -1, 1];
+        };
+    } else {
+        return function*() {
+            yield [false, -1, -1];
+            yield [false,  1, -1];
+        }
+    }
+}
+
+function captures(game, color, promoted) {
+    if(promoted) {
+        return function*() {
+            yield [game.flyingKings, -1, -1];
+            yield [game.flyingKings, -1,  1];
+            yield [game.flyingKings,  1, -1];
+            yield [game.flyingKings,  1,  1]; 
+        }
+    } else {
+        if(game.backwardCapture) {
+            return function*() {
+                yield [false, -1, -1];
+                yield [false, -1,  1];
+                yield [false,  1, -1];
+                yield [false,  1,  1]; 
+            }
+        } else if(color) {
+            return function*() {
+                yield [false,  1, 1];
+                yield [false, -1, 1];
+            };
+        } else {
+            return function*() {
+                yield [false, -1, -1];
+                yield [false,  1, -1];
+            }
+        }
+    }
+}
+
+function promotionZone(game, piece) {
+    if(piece.color) {
+        return piece.y == game.height - 1;
+    } else {
+        return piece.y == 0;
+    }
 }
 
 function getPieceId(game, x, y) {
-    for(var i = 0; i < game.piece_count; i++)
+    for(var i = 0; i < game.pieceCount; i++)
     if(game.pieces[i].x == x && game.pieces[i].y == y)
         return i;
     return undefined;
@@ -103,12 +180,12 @@ function isOccupied(game, x, y) {
 
 function removePiece(game, piece) {
     game.pieces.splice(game.pieces.indexOf(piece), 1);
-    game.piece_count--;
+    game.pieceCount--;
 }
 
 function getMoves(game, piece) {
     availableMoves = [];
-    for(var move of game.moves(piece.color, piece.promoted)) {
+    for(var move of moves(game, piece.color, piece.promoted)) {
         if(move[0]) { // long move
             var i = 1;
             var capX, capY;
@@ -137,7 +214,7 @@ function getMoves(game, piece) {
 
 function getCaptures(game, piece) {
     availableCaptures = [];
-    for(var capture of game.captures(piece.color, piece.promoted)) {
+    for(var capture of captures(game, piece.color, piece.promoted)) {
         if(capture[0]) { // long capture
 
             var i = 1;
@@ -169,7 +246,7 @@ function getCaptures(game, piece) {
                         toX  : piece.x + move[1] * 2,
                         toY  : piece.y + move[2] * 2,
                         capture: true,
-                        capXtured: captured_piece
+                        captured: captured_piece
                     });
                 }
             }
@@ -178,29 +255,35 @@ function getCaptures(game, piece) {
     return availableCaptures;
 }
 
-function validateMove(game, piece, move) {
-    if(game.current_turn != piece.color) return false; // wrong turn
-    if(!game.pieces.includes(piece)) return false; // no such piece
-    var moves = getMoves(game, piece);
-    var captures = getCaptures(game, piece);
+function validateMove(game, move) {
+    if(game.currentTurn != move.piece.color) return false; // wrong turn
+    if(!game.pieces.includes(move.piece)) return false; // no such piece
+    var moves = getMoves(game, move.piece);
+    var captures = getCaptures(game, move.piece);
     if(!moves.includes(move) && !captures.includes(move)) return false; // not available
     return true;
 }
 
-// TODO
-function executeMove(game, piece, move) {
-    piece.x = move.toX;
-    piece.y = move.toY;
+function executeMove(game, move) {
+    move.piece.x = move.toX;
+    move.piece.y = move.toY;
     if(move.capture) {
         removePiece(game, move.captured);
     }
-    // change below to implement promotion on-the-fly
-    if(this.square[move.toY * this.width + move.toX].getFirstMoves() == [] &&   // does not have any moves left
-        this.square[move.toY * this.width + move.toX].promotion()) {            // is in promotion zone
-        this.square[move.toY * this.width + move.toX].promoted = true;          // promote it!
-        this.nextTurn();
-    } else if(move.capture == false ||                                             // there was no capture
-            this.square[move.toY * this.width + move.toX].getFirstMoves() == []) { // there are no more moves
-            this.nextTurn();
+    if(promotionZone(game, move.piece)) {
+        if(game.promotionOnTheFly || getCaptures(game, move.piece) == []) {
+            move.piece.promoted = true;
+        }
     }
+    if(!move.capture || getCaptures(game, move.piece) == []) {
+        game.currentTurn = !game.currentTurn;
+    }
+}
+
+module.exports = {
+    Game,
+    getMoves,
+    getCaptures,
+    validateMove,
+    executeMove
 }

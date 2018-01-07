@@ -1,24 +1,49 @@
+// import * as http from "http" // zaremować przed uruchomieniem
 
-var tables_data = {
-    table1: {
-        hostname: 'Rambo', // nazwa użytkownika hosta
+/**
+ * 
+ * @param {http.IncomingMessage} req 
+ * @param {http.ServerResponse}  res 
+ * @param {*} next 
+ */
+
+var token = require("./token.js");
+
+var tablesData = {
+    table1_id: {
+        hostname: 'sdfRambo', // nazwa użytkownika hosta
+        hostnick: 'Rambo',
+        guestname: undefined,
+        guestnick: undefined,
         gametype: 'Classic 8x8', // rodzaj gry
-        id: 'gd713edg8diyqwd87ydeqw' // unikalne id stołu
+        token: 'ncbw12h3oic'
     },
-    table2: {
+    table2_id: {
         hostname: 'xxX_69Anthony69_Xxx',
+        hostnick: 'Anthony',
+        guestname: undefined,
+        guestnick: undefined,
         gametype: 'Classic 10x10',
-        id: 'fh38cn08equ0hdq308uewcx'
+        token: 'fewah732de'
     }
 };
 
 module.exports = {
     init : function(io, app) {
-    
-        app.get('/tables/:id/join', (req, res) => {
-            // join a table 
-            // req.params.id - table's ID
-            res.end();
+        
+        app.post('/tables/join/:id', (req, res) => {
+            var tableId = req.params.id;
+            if(tablesData[tableId]) {
+                if(tablesData[tableId].guestname) {
+                    res.end('error');
+                } else {
+                    tablesData[tableId].guestname = req.cookies.username; 
+                    tablesData[tableId].guestnick = req.cookies.nickname;
+                    io.of('/' + tableId);
+                }
+            } else {
+                res.end('error');
+            }
         });
 
         app.get('/tables/:id', (req, res) => {
@@ -38,7 +63,7 @@ module.exports = {
         })
 
 
-        var tables = io.of('/table');
+        var tables = io.of('/tables');
 
             
         /**
