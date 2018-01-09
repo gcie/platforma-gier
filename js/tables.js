@@ -14,40 +14,47 @@ var tablesData = {
     table1_id: {
         hostname: 'sdfRambo', // nazwa użytkownika hosta
         hostnick: 'Rambo',
-        hostpass: 'gf748238d89a9f7',
+        hostpass: 'host#gf748238d89a9f7',
+        hostsocket: 'fr23r32vgjfxr23ar',
         guestname: undefined,
         guestnick: undefined,
         guestpass: undefined,
+        guestsocket: undefined,
         gametype: 'Classic 8x8' // rodzaj gry
     },
     table2_id: {
         hostname: 'xxX_69Anthony69_Xxx',
         hostnick: 'Anthony',
-        hostpass: 'r3y89quda9dfuaf',
+        hostpass: 'host#r3y89quda9dfuaf',
+        hostsocket: 'rqi2h93r8h8rj',
         guestname: undefined,
         guestnick: undefined,
-        guestpass = undefined,
+        guestpass: undefined,
+        guestsocket: undefined,
         gametype: 'Classic 10x10'
     }
 };
 
 module.exports = {
     init : function(io, app) {
+        app.post('/tables/create', (req, res) => {
+
+        });
         
         app.post('/tables/join/:id', (req, res) => {
             var tableId = req.params.id;
-            if(tablesData[tableId]) {
-                if(tablesData[tableId].guestname) {
+            if(tablesData[tableId]) { // table exists
+                if(tablesData[tableId].guestpass) { // there is already a guest
                     res.end('error');
                 } else {
-                    tablesData[tableId].guestname = req.cookies.username; 
+                    tablesData[tableId].guestpass = token();                    
+                    tablesData[tableId].guestname = req.cookies.username;
                     tablesData[tableId].guestnick = req.cookies.nickname;
-                    tablesData[tableId].guestpass = token();
                     res.redirect(url.format({
                         pathname: '/tables/' + tableId,
-                        query: { p: tablesData[tableId].guestpass }
+                        query: { p: 'guest#' + tablesData[tableId].guestpass }
                     }));
-                    io.of('/' + tableId);
+                    
                 }
             } else {
                 res.end('error');
@@ -55,21 +62,18 @@ module.exports = {
         });
 
         app.get('/tables/:id', (req, res) => {
-            // spectate a table 
+            if(req.query.p)
+            {
+                res.render('game')
+            }
+            // spectate a table, or play
             // req.params.id - table's ID
             res.end();
         });
 
         app.get('/tables', (req, res) => {
-            res.render('tables', {tables_data});
+            res.render('tables', {tablesData});
         });
-
-        app.post('/tables', (req, res) => {
-            // create a table
-            res.write('creating table: ' + req.body.game_type);
-            res.end();
-        })
-
 
         var tables = io.of('/tables');
 
@@ -80,38 +84,7 @@ module.exports = {
          *  he calls this function below with his socket
          */
         tables.on('connection', function(socket) { // TODO
-        
-                socket.on('create-table', function(data) {
-                    /**
-                     * assign new table.
-                     */
-                    var tableId = token();
-                    tablesData[tableId] = {
-                        hostname = data.username,
-                        hostnick = data.nickname,
-                        hostsocket = socket.id,
-                        guestname = undefined,
-                        guestnick = undefined,
-                        guestsocket = undefined,
-                        gametype = data.gametype
-                    }
-                    socket.emit('table-id', tableId); // sending table id to it's creator
-                });
-        
-                socket.on('join-table', function(data) {
-                    /**
-                     * join chosen table.
-                     */
-                    if (tablesData[data.tableId].guestsocket) {
-                        socket.emit('error', 'occupied');
-                    } else {
-                        tablesData[data.tableId].guestsocket = socket;
-                        tablesData[data.tableId].guestname = data.username;
-                        tablesData[data.tableId].guestnick = data.nickname
-                    }
-                    socket.join(data.table_id);
-                });
-        
+    
                 socket.on('disconnect', function() {
                     /**
                      * destroy tables etc.

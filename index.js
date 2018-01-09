@@ -14,7 +14,7 @@ const express = require('express');
 
 var app = express();
 
-require("/js/coockie.js").init(app);
+// require("/js/cookie.js").init(app);
 
 app.set('view engine', 'html');
 app.set('views', './views');
@@ -43,5 +43,5 @@ server.listen(3000);
 
 console.log("Server started!");
 
-require("/js/tables.js").init(io, app);
-require("/js/game.js").init(io, app);
+require("./js/tables.js").init(io, app);
+// require("/js/game.js").init(io, app);

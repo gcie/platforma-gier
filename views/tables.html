@@ -41,16 +41,16 @@
             <th>Game type</th>
             <th></th>
         </tr>
-        <% for(var table in locals.tables_data) { %>
+        <% for(var table in locals.tablesData) { %>
             <tr>
                 <td>
-                    <%= locals.tables_data[table].hostname %>
+                    <%= locals.tablesData[table].hostnick %>
                 </td>
                 <td>
-                    <%= locals.tables_data[table].gametype %>
+                    <%= locals.tablesData[table].gametype %>
                 </td>
                 <td>
-                    <button onclick="joinTable( '<%= locals.tables_data[table].id %>' )">Join</button>
+                    <button onclick="joinTable( '<%= table %>' )">Join</button>
                 </td>
             </tr>
         <% } %>
