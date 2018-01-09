@@ -51,11 +51,11 @@ tables.on('connection', function(socket) { // TODO
     socket.on('create-table', function(data) { // TODO
         console.log(socket.id + ': ' + data.table_data);
         console.log(data);
-        //socket.emit('table-id', table_id); // sending table id to it's creator
+        socket.emit('table-id', table_id); // sending table id to it's creator
     });
 
-    socket.on('join-table', function(id, data) {
-        socket.join(data.table_id);
+    socket.on('join-table', function(data) {
+        socket.emit('response', data + ' test');
     });
 
     socket.on('disconnect', function() {

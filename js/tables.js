@@ -8,23 +8,26 @@
  */
 
 var token = require("./token.js");
+const url = require('url');
 
 var tablesData = {
     table1_id: {
         hostname: 'sdfRambo', // nazwa użytkownika hosta
         hostnick: 'Rambo',
+        hostpass: 'gf748238d89a9f7',
         guestname: undefined,
         guestnick: undefined,
-        gametype: 'Classic 8x8', // rodzaj gry
-        token: 'ncbw12h3oic'
+        guestpass: undefined,
+        gametype: 'Classic 8x8' // rodzaj gry
     },
     table2_id: {
         hostname: 'xxX_69Anthony69_Xxx',
         hostnick: 'Anthony',
+        hostpass: 'r3y89quda9dfuaf',
         guestname: undefined,
         guestnick: undefined,
-        gametype: 'Classic 10x10',
-        token: 'fewah732de'
+        guestpass = undefined,
+        gametype: 'Classic 10x10'
     }
 };
 
@@ -39,6 +42,11 @@ module.exports = {
                 } else {
                     tablesData[tableId].guestname = req.cookies.username; 
                     tablesData[tableId].guestnick = req.cookies.nickname;
+                    tablesData[tableId].guestpass = token();
+                    res.redirect(url.format({
+                        pathname: '/tables/' + tableId,
+                        query: { p: tablesData[tableId].guestpass }
+                    }));
                     io.of('/' + tableId);
                 }
             } else {
@@ -73,27 +81,34 @@ module.exports = {
          */
         tables.on('connection', function(socket) { // TODO
         
-                socket.on('create-table', function(id, data) { // TODO
+                socket.on('create-table', function(data) {
                     /**
                      * assign new table.
-                     * id - uniqe identifier for each user, so when an annymous
-                     *  user connects, we will use this as his identifier
-                     * data - data of created table, and identification info
-                     *  about the user: anonymous / registered
                      */
-                    var table_id; // TODO
-                    socket.join(table_id); // joining created table
-                    socket.emit('table-id', table_id); // sending table id to it's creator
+                    var tableId = token();
+                    tablesData[tableId] = {
+                        hostname = data.username,
+                        hostnick = data.nickname,
+                        hostsocket = socket.id,
+                        guestname = undefined,
+                        guestnick = undefined,
+                        guestsocket = undefined,
+                        gametype = data.gametype
+                    }
+                    socket.emit('table-id', tableId); // sending table id to it's creator
                 });
         
-                socket.on('join-table', function(id, data) {
+                socket.on('join-table', function(data) {
                     /**
                      * join chosen table.
-                     * id - as above
-                     * data - table data and userdata
-                     * 
-                     * delete the table from database to prevent anyone from connecting to it
                      */
+                    if (tablesData[data.tableId].guestsocket) {
+                        socket.emit('error', 'occupied');
+                    } else {
+                        tablesData[data.tableId].guestsocket = socket;
+                        tablesData[data.tableId].guestname = data.username;
+                        tablesData[data.tableId].guestnick = data.nickname
+                    }
                     socket.join(data.table_id);
                 });
         
