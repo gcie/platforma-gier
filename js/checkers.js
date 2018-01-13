@@ -19,6 +19,12 @@ class Game {
 
         this.currentTurn = this.starts;
 
+        this.desc = 'Classic ' + this.width + 'x' + this.height;
+        /**
+         * this.time = 10;
+         * this.increment = 0;
+         */
+
         // Set up pieces
         for(var i = 0; i < this.rows; i++)
         for(var j = 0; j < this.width; j++)
@@ -48,6 +54,8 @@ class Game {
         this.fullCapture = true;
         this.droppingPieces = false;
         this.promotionOnTheFly = false;
+
+        this.desc = 'Classic ' + this.width + 'x' + this.height;
     }
 
     pool() {
@@ -58,6 +66,8 @@ class Game {
         this.fullCapture = true;
         this.droppingPieces = false;
         this.promotionOnTheFly = false;
+        
+        this.desc = 'Pool ' + this.width + 'x' + this.height;
     }
 
     russian() {
@@ -68,6 +78,8 @@ class Game {
         this.fullCapture = true;
         this.droppingPieces = false;
         this.promotionOnTheFly = true;
+        
+        this.desc = 'Russian ' + this.width + 'x' + this.height;
     }
 
     english() {
@@ -78,6 +90,8 @@ class Game {
         this.fullCapture = true;
         this.droppingPieces = false;
         this.promotionOnTheFly = false;
+        
+        this.desc = 'English ' + this.width + 'x' + this.height;
     }
 
     toJSON() {
@@ -98,7 +112,8 @@ class Game {
             droppingPieces: this.droppingPieces,
             promotionOnTheFly: this.promotionOnTheFly,
     
-            currentTurn: this.currentTurn
+            currentTurn: this.currentTurn,
+            desc: this.desc
         }
     }
 }
