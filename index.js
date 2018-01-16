@@ -14,7 +14,7 @@ const express = require('express');
 
 var app = express();
 
-// require("/js/cookie.js").init(app);
+var cookies = require("./js/cookie.js");
 
 app.set('view engine', 'html');
 app.set('views', './views');
@@ -29,7 +29,7 @@ app.use(express.urlencoded({extended: true})); // żeby przekazywać parametry P
 
 var server = http.createServer(app);
 var io = require('socket.io')(server);
-
+cookies.init(io, app);
 
 app.get('/', (req, res) => {
     res.render('app');
