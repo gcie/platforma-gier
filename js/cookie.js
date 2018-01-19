@@ -29,7 +29,7 @@ module.exports = ({
         }
     },
     init : function(io, app) {
-        function checkPwd(login, pwd, res)
+        function checkPwd(login, pwd, logging)
         {
             db.task(t => {
                 return t.one('SELECT * FROM users WHERE login = $1', login);
@@ -37,17 +37,15 @@ module.exports = ({
                 console.log(result);
                 if(result.password != pwd) 
                 {
-                    return false;
+                    logging = {value : false, user : ''};
                 } else {
-                    res.cookie('user', result.login + '&' + result.username + '&' + result.password + '&' + result.wins + '&' + result.losses + '&' + result.draws);
                     console.log('noice');
-                    return true;
+                    logging = {value : true, user : result.login + '&' + result.username + '&' + result.password + '&' + result.wins + '&' + result.losses + '&' + result.draws};
                 }
             }).catch(err => {
                 console.error('', err)
-                return false;
+                logging = {value : false, user : ''};
             });
-
         };
         function allowedUsername(name, pwd, pwd2) {
             if(pwd != pwd2){
@@ -66,11 +64,22 @@ module.exports = ({
         app.post('/login', (req, res) => {
             var user = req.body.username;
             var pwd = req.body.pwd;
-            if(checkPwd(user,pwd,res)) {
-                res.redirect('/');
-            } else {
-                res.render('login', { message : 'Incorrect username or password' });
-            }
+            db.task(t => {
+                return t.one('SELECT * FROM users WHERE login = $1', user);
+            }).then(result => {
+                console.log(result);
+                if(result.password != pwd) 
+                {
+                    res.render('login', { message : 'Incorrect username or password' });
+                } else {
+                    console.log('noice');
+                    res.cookie('user', result.login + '&' + result.username + '&' + result.password + '&' + result.wins + '&' + result.losses + '&' + result.draws);
+                    res.redirect('/');
+                }
+            }).catch(err => {
+                console.error('cos', err)
+                res.render('login', { message : 'Incorrect username or password' })
+            });
         });
 
         app.post('/newaccount', (req, res) => {
