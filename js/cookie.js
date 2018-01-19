@@ -34,12 +34,10 @@ module.exports = ({
             db.task(t => {
                 return t.one('SELECT * FROM users WHERE login = $1', login);
             }).then(result => {
-                console.log(result);
                 if(result.password != pwd) 
                 {
                     logging = {value : false, user : ''};
                 } else {
-                    console.log('noice');
                     logging = {value : true, user : result.login + '&' + result.username + '&' + result.password + '&' + result.wins + '&' + result.losses + '&' + result.draws};
                 }
             }).catch(err => {
