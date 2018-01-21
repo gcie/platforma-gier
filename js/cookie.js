@@ -29,25 +29,15 @@ module.exports = ({
         }
     },
     init : function(io, app) {
-        function checkPwd(login, pwd, logging)
-        {
-            db.task(t => {
-                return t.one('SELECT * FROM users WHERE login = $1', login);
-            }).then(result => {
-                if(result.password != pwd) 
-                {
-                    logging = {value : false, user : ''};
-                } else {
-                    logging = {value : true, user : result.login + '&' + result.username + '&' + result.password + '&' + result.wins + '&' + result.losses + '&' + result.draws};
-                }
-            }).catch(err => {
-                console.error('', err)
-                logging = {value : false, user : ''};
-            });
-        };
         function allowedUsername(name, pwd, pwd2) {
-            if(pwd != pwd2){
+            var allowedSigns = 'qwertyuiopasdfghjklzxcvbnm1234567890'
+            if(pwd != pwd2 || name.length > 20 || name.length < 6){
                 return false
+            }
+            var isallowed = true;
+            for(var i = 0; i < name.length; i++)
+            {
+                //if()
             }
             return true 
         };
@@ -65,12 +55,10 @@ module.exports = ({
             db.task(t => {
                 return t.one('SELECT * FROM users WHERE login = $1', user);
             }).then(result => {
-                console.log(result);
                 if(result.password != pwd) 
                 {
                     res.render('login', { message : 'Incorrect username or password' });
                 } else {
-                    console.log('noice');
                     res.cookie('user', result.login + '&' + result.username + '&' + result.password + '&' + result.wins + '&' + result.losses + '&' + result.draws);
                     res.redirect('/');
                 }
@@ -84,17 +72,29 @@ module.exports = ({
             var user = req.body.username;
             var pwd = req.body.pwd;
             var pwd2 = req.body.pwd2;
-            if(allowedUsername(user, pwd, pwd2))
-            {
-                res.redirect('/login');
-            } else {
-                if(pwd === pwd2){
-                    res.redirect('/newacc', {message : 'Username unallowed'});
-                }
-                else {
-                    res.redirect('/newacc', {message : 'These passwords are different'});
-                }
-            }
+            db.one('SELECT * FROM users WHERE login = $1', user)
+                .then(res => {
+                    res.render('newaccount', {message : 'User with this login already exists.'});
+                    user = '#';
+                }).catch(err => {
+                    if(allowedUsername(user, pwd, pwd2))
+                    {
+                        db.none('INSERT INTO users(login, username, password, wins, losses, draws) VALUES($1, $2, $3, 0, 0, 0)', [user, user, pwd])
+                            .then(() => {
+                                res.redirect('/login');
+                            }).catch(err => {
+                                console.error(err);
+                                res.render('newaccount', {message : 'Creating account failed'});
+                            });                
+                    } else {
+                        if(pwd === pwd2){
+                            res.render('newaccount', {message : 'Username has to have between 6 and 20 characters, only letters and numbers'});
+                        }
+                        else {
+                            res.render('newaccount', {message : 'These passwords are different'});
+                        }
+                    }
+                });
         });
     }
 });
