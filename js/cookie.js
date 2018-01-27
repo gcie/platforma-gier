@@ -9,6 +9,7 @@ const cookieParser = require('cookie-parser');
 const pgp = require('pg-promise')({});
 const cn = 'postgres://postgres:dawid@localhost:5432/postgres';
 const db = pgp(cn);
+const bcrypt = require('bcrypt');
 
 
 module.exports = ({
@@ -30,16 +31,16 @@ module.exports = ({
     },
     init : function(io, app) {
         function allowedUsername(name, pwd, pwd2) {
-            var allowedSigns = 'qwertyuiopasdfghjklzxcvbnm1234567890'
-            if(pwd != pwd2 || name.length > 20 || name.length < 6){
+            var allowedSigns = 'qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890'
+            if(pwd != pwd2 || name.length > 20 || name.length < 6 || pwd.length < 8 || pwd.length > 20){
                 return false
             }
             var isallowed = true;
             for(var i = 0; i < name.length; i++)
             {
-                //if()
+                if(allowedSigns.search(name[i]) == -1) isallowed = false;
             }
-            return true 
+            return isallowed;
         };
         app.get('/login', (req,res) => {
             res.render('login', {message : ''});
@@ -55,13 +56,16 @@ module.exports = ({
             db.task(t => {
                 return t.one('SELECT * FROM users WHERE login = $1', user);
             }).then(result => {
-                if(result.password != pwd) 
+                bcrypt.compare(pwd,result.password, (err,correct) =>
                 {
-                    res.render('login', { message : 'Incorrect username or password' });
-                } else {
-                    res.cookie('user', result.login + '&' + result.username + '&' + result.password + '&' + result.wins + '&' + result.losses + '&' + result.draws);
-                    res.redirect('/');
-                }
+                    if(!correct) 
+                    {
+                        res.render('login', { message : 'Incorrect username or password' });
+                    } else {
+                        res.cookie('user', result.login + '&' + result.username + '&' + result.password + '&' + result.wins + '&' + result.losses + '&' + result.draws);
+                        res.redirect('/');
+                    }
+                });
             }).catch(err => {
                 console.error('cos', err)
                 res.render('login', { message : 'Incorrect username or password' })
@@ -79,13 +83,17 @@ module.exports = ({
                 }).catch(err => {
                     if(allowedUsername(user, pwd, pwd2))
                     {
-                        db.none('INSERT INTO users(login, username, password, wins, losses, draws) VALUES($1, $2, $3, 0, 0, 0)', [user, user, pwd])
-                            .then(() => {
-                                res.redirect('/login');
-                            }).catch(err => {
-                                console.error(err);
-                                res.render('newaccount', {message : 'Creating account failed'});
-                            });                
+                        bcrypt.genSalt(10, (err, salt) => {
+                            bcrypt.hash(pwd, salt, (err, hash) => {
+                                db.none('INSERT INTO users(login, username, password, wins, losses, draws) VALUES($1, $2, $3, 0, 0, 0)', [user, user, hash])
+                                    .then(() => {
+                                        res.redirect('/login');
+                                    }).catch(err => {
+                                        console.error(err);
+                                        res.render('newaccount', {message : 'Creating account failed'});
+                                    });
+                            });
+                        });          
                     } else {
                         if(pwd === pwd2){
                             res.render('newaccount', {message : 'Username has to have between 6 and 20 characters, only letters and numbers'});
