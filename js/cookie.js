@@ -11,28 +11,47 @@ const cn = 'postgres://postgres:dawid@localhost:5432/postgres';
 const db = pgp(cn);
 const bcrypt = require('bcrypt');
 
+function * gener() {
+    var a = 1000; 
+    while(true)
+    {
+        yield a++;
+    }
+}
+
+let gen = gener;
 
 module.exports = ({
     authorize : function (req,res,next) {
         if ( req.cookies.user ) {
             var usr = req.cookies.user.split('&');
-            req.user = {
-                login : usr[0],
-                username : usr[1],
-                password : usr[2],
-                wins : usr[3],
-                losses : usr[4],
-                draws : usr[5]
-            } 
+            if(usr[0][0] != '@') {
+                req.user = {
+                    login : usr[0],
+                    username : usr[1],
+                    password : usr[2],
+                    wins : usr[3],
+                    losses : usr[4],
+                    draws : usr[5]
+                }
+            } else {
+                req.user = {
+                    login : usr[0],
+                    username : usr[1]
+                }
+            }
             next();
         } else {
             res.redirect( '/login'); 
         }
     },
     init : function(io, app) {
-        function allowedUsername(name, pwd, pwd2) {
+        var ID = function () {
+            return '@' + Math.random().toString(36).substr(2, 9);
+        };
+        function allowedUsername(name) {
             var allowedSigns = 'qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890'
-            if(pwd != pwd2 || name.length > 20 || name.length < 6 || pwd.length < 8 || pwd.length > 20){
+            if(name.length > 20 || name.length < 6){
                 return false
             }
             var isallowed = true;
@@ -48,6 +67,10 @@ module.exports = ({
         
         app.get('/newaccount', (req,res) => {
             res.render('newaccount', {message : ''});
+        });
+
+        app.get('/anonymous', (req,res) => {
+            res.render('anonymous', {message :''});
         });
 
         app.post('/login', (req, res) => {
@@ -79,9 +102,8 @@ module.exports = ({
             db.one('SELECT * FROM users WHERE login = $1', user)
                 .then(res => {
                     res.render('newaccount', {message : 'User with this login already exists.'});
-                    user = '#';
                 }).catch(err => {
-                    if(allowedUsername(user, pwd, pwd2))
+                    if(allowedUsername(user) && pwd==pwd2 && pwd.length > 8 && pwd.length < 20)
                     {
                         bcrypt.genSalt(10, (err, salt) => {
                             bcrypt.hash(pwd, salt, (err, hash) => {
@@ -103,6 +125,18 @@ module.exports = ({
                         }
                     }
                 });
+        });
+
+        app.post('/anonymous', (req,res) => {
+            if(allowedUsername(req.body.username))
+            {
+                var ident = ID();
+                console.log(ident);
+                res.cookie('user', ident + '&' + req.username);
+                res.redirect('/');
+            } else {
+                res.render('anonymous', {message :'Nickname should have from 6 to 20 symbols containing letters from english alphabet or numbers'})
+            }
         });
     }
 });
