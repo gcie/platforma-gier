@@ -52,12 +52,14 @@ module.exports = ({
         function allowedUsername(name) {
             var allowedSigns = 'qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890'
             if(name.length > 20 || name.length < 6){
-                return false
+                return false;
             }
             var isallowed = true;
             for(var i = 0; i < name.length; i++)
             {
-                if(allowedSigns.search(name[i]) == -1) isallowed = false;
+                if(allowedSigns.search(name[i]) == -1) {
+                    isallowed = false;
+                }
             }
             return isallowed;
         };
@@ -103,7 +105,7 @@ module.exports = ({
                 .then(res => {
                     res.render('newaccount', {message : 'User with this login already exists.'});
                 }).catch(err => {
-                    if(allowedUsername(user) && pwd==pwd2 && pwd.length > 8 && pwd.length < 20)
+                    if(allowedUsername(user) && pwd==pwd2 && pwd.length >= 8 && pwd.length <= 20)
                     {
                         bcrypt.genSalt(10, (err, salt) => {
                             bcrypt.hash(pwd, salt, (err, hash) => {
