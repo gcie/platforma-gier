@@ -26,7 +26,7 @@
             req.open('post', '/join/' + tableId);
             req.onreadystatechange = function() {
                 if ( req.readyState == XMLHttpRequest.DONE ) {
-                    
+                    window.location.href = ""
                 }
             }
             req.send();
@@ -46,7 +46,7 @@
             var login = document.getElementById('in-hostname').value;
 
             req.send(JSON.stringify({
-                gametype: gametype,
+                gamedata: null,
                 hostnick: nick,
                 hostname: login
             }));
@@ -54,23 +54,26 @@
             req.onreadystatechange = function() {
                 if(req.readyState == XMLHttpRequest.DONE) {
                     var data = JSON.parse(req.response);
-                    if(data.err) {
+                    if(data.err || !data.id || !data.pass) {
                         console.log('data incomplete');
-                    } else { 
-                        console.log(window.location.hostname + ':' + window.location.port + '/tables/' + data.id);
-                        window.location.href = '/tables/' + data.id;
+                    } else {
+                        window.localStorage.setItem('currentGameId', data.id);
+                        window.localStorage.setItem('currentGamePass', data.pass)
+                        window.location.href = '/tables/' + data.id + "?p=" + data.pass;
                     }
                 }
             };
         }
 
-        window.onload = function() {
+        function socketRegister() {
             socket = io('/tables');
-
             socket.on('update-list', function(data) {
-                console.log(data);
                 buildTable(data);
             });
+        }
+
+        window.onload = function() {
+            socketRegister();
 
             document.getElementById('bt-create').addEventListener('click', function() {
                 createTable();

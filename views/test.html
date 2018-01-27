@@ -9,13 +9,16 @@
     <script>
         var socket = io("/table");
 
+        window.localStorage.setItem('data', 'qwertyuiop1234567890');
+
         socket.on('response', function(data) {
             console.log(data);
         });
 
         window.onload = function() {
             document.getElementById("b").addEventListener("click", function() {
-                socket.emit('join-table', 'test');
+                socket.emit('join-table', window.localStorage.getItem('data'));
+                window.location.href = '/test';
             });
         }
     </script>

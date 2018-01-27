@@ -9,6 +9,7 @@
 
 var token = require("./token.js");
 const url = require('url');
+var Game = require('./checkers.js').Game;
 
 var TABLEDATA = {
     table1_id: {
@@ -51,6 +52,13 @@ function converttables() {
     return data;
 }
 
+function initGame(id) {
+    var gameclass = new Game(8, 8, 3);
+    gameclass.hostnick = TABLEDATA[id].hostnick;
+    gameclass.guestnick = TABLEDATA[id].guestnick;
+    return gameclass.toJSON;
+}
+
 module.exports = {
     init : function(io, app) {
         var tables = io.of('/tables');
@@ -64,7 +72,7 @@ module.exports = {
             var data;
             for(var i in req.body)
                 data = JSON.parse(i);
-            if(!data.gametype || !data.hostnick) { // data incomplete
+            if(/* !data.gamedata || */ !data.hostnick) { // data incomplete
                 res.send(JSON.stringify({err: 'Incomplete data'}));
             } else {
                 var id = token();
@@ -74,7 +82,7 @@ module.exports = {
                 TABLEDATA[id].hostnick = data.hostnick;
                 TABLEDATA[id].hostpass = token(4);
                 TABLEDATA[id].hostsocket = data.socket;
-                TABLEDATA[id].gametype = data.gametype;
+                TABLEDATA[id].gamedata = data.gamedata;
                 res.send({
                     id: id,
                     pass: TABLEDATA[id].hostpass
@@ -85,25 +93,40 @@ module.exports = {
 //            console.log('creating table: ' + req.body);
         });
         
-        app.post('/tables/join/:id', (req, res) => {
+        app.get('/tables/:id', (req, res) => {
+            var id = req.params.id;
+
+            if(TABLEDATA[id]) {
+
+            } else {
+                res.render('error', {msg: 'Szukana strona nie istnieje.'});
+            }
+        });
+
+        app.post('/tables/:id', (req, res) => {
             var id = req.params.id;
 
             if(TABLEDATA[id]) { // table exists
-                if(TABLEDATA[id].guestpass) { // there is already a guest
-                    res.end('error');
-                } else {
+                res.render('game', {
+                    hostnick: TABLEDATA[id].hostnick,
+                    guestnick: TABLEDATA[id].guestnick,
+                        
+                });
+                if(!TABLEDATA[id].guestpass) { // there is no second player yet
                     TABLEDATA[id].guestpass = token();                    
                     TABLEDATA[id].guestname = req.cookies.username;
                     TABLEDATA[id].guestnick = req.cookies.nickname;
                     if(!TABLEDATA[id].hostcolor) TABLEDATA[id].hostcolor = (Math.random() < 0.5);
-                    res.redirect(url.format({
-                        pathname: '/tables/' + id,
-                        query: { p: 'guest#' + TABLEDATA[id].guestpass }
-                    }));
-                    
+                    res.render('game', { 
+                        hostnick: TABLEDATA[id].hostnick,
+                        guestnick: TABLEDATA[id].guestnick,
+                        pass: TABLEDATA[id].guestpass
+                    });
+                } else {
+                    res.render('error', {msg: 'Stół jest zajęty.'});
                 }
             } else {
-                res.end('error');
+                res.render('error', {msg: 'Szukany stół nie istnieje.'});
             }
         });
 

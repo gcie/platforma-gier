@@ -32,6 +32,10 @@ app.get('/', (req, res) => {
     res.render('test', {foo: 'qwertyuiop'});
 });
 
+app.get('/test', (req, res) => {
+    res.render('test2');
+})
+
 server.listen(3000);
 
 console.log("Server started!");
@@ -55,6 +59,7 @@ tables.on('connection', function(socket) { // TODO
     });
 
     socket.on('join-table', function(data) {
+        console.log('data received: ' + data);
         socket.emit('response', data + ' test');
     });
 

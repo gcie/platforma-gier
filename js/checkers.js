@@ -20,6 +20,9 @@ class Game {
         this.currentTurn = this.starts;
 
         this.desc = 'Classic ' + this.width + 'x' + this.height;
+
+        this.hostnick = '';
+        this.guestnick = '';
         /**
          * this.time = 10;
          * this.increment = 0;
@@ -113,7 +116,10 @@ class Game {
             promotionOnTheFly: this.promotionOnTheFly,
     
             currentTurn: this.currentTurn,
-            desc: this.desc
+            desc: this.desc,
+
+            guestnick: this.guestnick,
+            hostnick: this.hostnick
         }
     }
 }
