@@ -18,11 +18,10 @@ class Game {
         this.promotionOnTheFly = false;
 
         this.currentTurn = this.starts;
+        this.activePiece = undefined;
 
         this.desc = 'Classic ' + this.width + 'x' + this.height;
 
-        this.hostnick = '';
-        this.guestnick = '';
         /**
          * this.time = 10;
          * this.increment = 0;
@@ -124,53 +123,39 @@ class Game {
     }
 }
 
-function moves(game, color, promoted) {
+function* movesIterator(game, color, promoted) {
     if(promoted) {
-        return function*() {
-            yield [game.flyingKings, -1, -1];
-            yield [game.flyingKings, -1,  1];
-            yield [game.flyingKings,  1, -1];
-            yield [game.flyingKings,  1,  1];    
-        }
+        yield [game.flyingKings, -1, -1];
+        yield [game.flyingKings, -1,  1];
+        yield [game.flyingKings,  1, -1];
+        yield [game.flyingKings,  1,  1];    
     } else if(color) {
-        return function*() {
-            yield [false,  1, 1];
-            yield [false, -1, 1];
-        };
+        yield [false,  1, 1];
+        yield [false, -1, 1];
     } else {
-        return function*() {
-            yield [false, -1, -1];
-            yield [false,  1, -1];
-        }
+        yield [false, -1, -1];
+        yield [false,  1, -1];
     }
 }
 
-function captures(game, color, promoted) {
+function* capturesIterator(game, color, promoted) {
     if(promoted) {
-        return function*() {
-            yield [game.flyingKings, -1, -1];
-            yield [game.flyingKings, -1,  1];
-            yield [game.flyingKings,  1, -1];
-            yield [game.flyingKings,  1,  1]; 
-        }
+        yield [game.flyingKings, -1, -1];
+        yield [game.flyingKings, -1,  1];
+        yield [game.flyingKings,  1, -1];
+        yield [game.flyingKings,  1,  1]; 
     } else {
         if(game.backwardCapture) {
-            return function*() {
-                yield [false, -1, -1];
-                yield [false, -1,  1];
-                yield [false,  1, -1];
-                yield [false,  1,  1]; 
-            }
+            yield [false, -1, -1];
+            yield [false, -1,  1];
+            yield [false,  1, -1];
+            yield [false,  1,  1]; 
         } else if(color) {
-            return function*() {
-                yield [false,  1, 1];
-                yield [false, -1, 1];
-            };
+            yield [false,  1, 1];
+            yield [false, -1, 1];
         } else {
-            return function*() {
-                yield [false, -1, -1];
-                yield [false,  1, -1];
-            }
+            yield [false, -1, -1];
+            yield [false,  1, -1];
         }
     }
 }
@@ -195,8 +180,8 @@ function getPiece(game, x, y) {
     return id ? game.pieces[id] : undefined;
 }
 
-function isOccupied(game, x, y) {
-    return getPieceId(game, x, y) === undefined;
+function isFree(game, x, y) {
+    return x >= 0 && x < game.width && y >= 0 && y < game.height && getPieceId(game, x, y) === undefined;
 }
 
 function removePiece(game, piece) {
@@ -205,12 +190,13 @@ function removePiece(game, piece) {
 }
 
 function getMoves(game, piece) {
+    if(!piece) return [];
     availableMoves = [];
-    for(var move of moves(game, piece.color, piece.promoted)) {
+    for(var move of movesIterator(game, piece.color, piece.promoted)) {
         if(move[0]) { // long move
             var i = 1;
             var capX, capY;
-            while(!isOccupied(game, piece.x + i * move[1], piece.y + i * move[2])) { // square is not occupied
+            while(isFree(game, piece.x + i * move[1], piece.y + i * move[2])) { // square is not occupied
                 availableMoves.push({
                     piece: piece,
                     toX  : piece.x + move[1] * i,
@@ -220,7 +206,7 @@ function getMoves(game, piece) {
                 i++;
             }
         } else { // short move
-            if(!isOccupied(game, piece.x + move[1], piece.y + move[2])) { // square is not occupied
+            if(isFree(game, piece.x + move[1], piece.y + move[2])) { // square is not occupied
                 availableMoves.push({
                     piece: piece,
                     toX  : piece.x + move[1],
@@ -234,19 +220,20 @@ function getMoves(game, piece) {
 }
 
 function getCaptures(game, piece) {
+    if(!piece) return [];
     availableCaptures = [];
-    for(var capture of captures(game, piece.color, piece.promoted)) {
-        if(capture[0]) { // long capture
+    for(var move of capturesIterator(game, piece.color, piece.promoted)) {
+        if(move[0]) { // long capture
 
             var i = 1;
 
-            while(!isOccupied(game, piece.x + i * move[1], piece.y + i * move[2])) i++; // square is not occupied
+            while(isFree(game, piece.x + i * move[1], piece.y + i * move[2])) i++; // square is not occupied
 
             var captured_piece = getPiece(game, piece.x + i * move[1], piece.y + i * move[2]);
 
             if(captured_piece !== undefined && captured_piece.color != piece.color) { // piece is of opposite color
                 i++;
-                while(!isOccupied(game, piece.x + i * move[1], piece.y + i * move[2])) { // spot available
+                while(isFree(game, piece.x + i * move[1], piece.y + i * move[2])) { // spot available
                         availableCaptures.push({
                             piece: piece,
                             toX  : piece.x + move[1] * i,
@@ -261,7 +248,7 @@ function getCaptures(game, piece) {
             var captured_piece = getPiece(game, piece.x + move[1], piece.y + move[2]);
 
             if(captured_piece !== undefined && captured_piece.color != piece.color) { // there is a piece to capture of opposite colour
-                if(!isOccupied(game, piece.x + 2 * move[1], piece.y + 2 * move[2])) { // there is a free spot
+                if(isFree(game, piece.x + 2 * move[1], piece.y + 2 * move[2])) { // there is a free spot
                     availableCaptures.push({
                         piece: piece,
                         toX  : piece.x + move[1] * 2,
@@ -286,18 +273,30 @@ function validateMove(game, move) {
 }
 
 function executeMove(game, move) {
-    move.piece.x = move.toX;
-    move.piece.y = move.toY;
-    if(move.capture) {
-        removePiece(game, move.captured);
-    }
-    if(promotionZone(game, move.piece)) {
-        if(game.promotionOnTheFly || getCaptures(game, move.piece) == []) {
-            move.piece.promoted = true;
+    var piece = getPiece(game, move.piece.x, move.piece.y);
+    piece.x = move.toX;
+    piece.y = move.toY;
+    if(promotionZone(game, piece)) {
+        if(move.capture) {
+            if(game.promotionOnTheFly || !game.fullCapture || (getCaptures(game, piece).length == 0)) {
+                piece.promoted = true;
+            }
+        } else {
+            piece.promoted = true;
         }
     }
-    if(!move.capture || getCaptures(game, move.piece) == []) {
-        game.currentTurn = !game.currentTurn;
+    if(move.capture) {
+        removePiece(game, getPiece(game, move.captured.x, move.captured.y));
+        console.log(getCaptures(game, piece));
+        if(game.fullCapture && (getCaptures(game, piece).length > 0)) {
+            game.activePiece = piece;
+        } else {
+            game.currentTurn = !game.currentTurn;
+            game.activePiece = undefined;
+        }
+    } else {
+        game.currentTurn = !game.currentTurn;        
+        game.activePiece = undefined;
     }
 }
 

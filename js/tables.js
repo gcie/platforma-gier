@@ -9,7 +9,34 @@
 
 var token = require("./token.js");
 const url = require('url');
-var Game = require('./checkers.js').Game;
+var checkers = require('./checkers.js');
+var Game = checkers.Game;
+var executeMove = checkers.executeMove;
+
+function createTable(hostname, hostnick) {
+    do{ id = token(); }while( TABLEDATA[id] );
+    var gameclass = new Game(8, 8, 3);
+    TABLEDATA[id] = {
+        hostname: hostname,
+        hostnick: hostnick,
+        gametype: "Classic 8x8",
+        hostcolor: (Math.random() < 0.5),
+        hostpass: token(),
+        gamefile: gameclass.toJSON()
+    };
+    return id;
+}
+
+function joinTable(id, guestname, guestnick) {
+    if(TABLEDATA[id] && !TABLEDATA[id].guestpass) { // table exists & there is no second player yet
+        TABLEDATA[id].guestpass = token();                    
+        TABLEDATA[id].guestname = guestname;
+        TABLEDATA[id].guestnick = guestnick;
+        return true;
+    } else {
+        return false;
+    }
+}
 
 var TABLEDATA = {
     table1_id: {
@@ -52,127 +79,114 @@ function converttables() {
     return data;
 }
 
-function initGame(id) {
-    var gameclass = new Game(8, 8, 3);
-    gameclass.hostnick = TABLEDATA[id].hostnick;
-    gameclass.guestnick = TABLEDATA[id].guestnick;
-    return gameclass.toJSON;
-}
+module.exports = function(io, app) {
+    var tables = io.of('/tables');
+    var games = io.of('/games');
 
-module.exports = {
-    init : function(io, app) {
-        var tables = io.of('/tables');
-        var games = io.of('/games');
+    app.get('/tables', (req, res) => {
+        res.render('tables');
+    });
 
-        app.get('/tables', (req, res) => {
-            res.render('tables');
-        });
-
-        app.post('/tables/create', (req, res) => {
-            var data;
-            for(var i in req.body)
-                data = JSON.parse(i);
-            if(/* !data.gamedata || */ !data.hostnick) { // data incomplete
-                res.send(JSON.stringify({err: 'Incomplete data'}));
-            } else {
-                var id = token();
-                while(TABLEDATA[id]) id = token();
-                TABLEDATA[id] = {};
-                TABLEDATA[id].hostname = data.hostnick;
-                TABLEDATA[id].hostnick = data.hostnick;
-                TABLEDATA[id].hostpass = token(4);
-                TABLEDATA[id].hostsocket = data.socket;
-                TABLEDATA[id].gamedata = data.gamedata;
-                res.send({
-                    id: id,
-                    pass: TABLEDATA[id].hostpass
-                });
-            }
+    app.post('/tables/create', (req, res) => { // creating new table
+        var data = req.body;
+        if(/* !data.gamedata || */ !data.hostnick) { // data incomplete
+            res.send({err: 'Incomplete data'});
+        } else {
+            var id = createTable(data.hostnick, data.hostnick);
+            res.send({ id: id, pass: TABLEDATA[id].hostpass });
             tables.emit('update-list', converttables());
-//                console.log(JSON.parse(i).hostnick);
-//            console.log('creating table: ' + req.body);
-        });
-        
-        app.get('/tables/:id', (req, res) => {
-            var id = req.params.id;
+        }
+    });
+    
+    app.post('/tables/join', (req, res) => { // joining an existing table
+        var id = req.body.id;
+        if(joinTable(id, 'mother', 'fucker'/*req.cookies.username, req.cookies.nickname*/)) {
+            res.send({id: id, pass: TABLEDATA[id].guestpass });
+            tables.emit('update-list', converttables());
+        } else {
+            res.send({err: 'Stół już jest zajęty lub nie istnieje.'});
+        }
+    });
 
-            if(TABLEDATA[id]) {
-
+    app.get('/tables/:id', (req, res) => {
+        var id = req.params.id;
+        var pass = req.query.p;
+        if(TABLEDATA[id]) {
+            if(TABLEDATA[id].hostpass == pass) {
+                res.render('game', {
+                    mynick: TABLEDATA[id].hostnick,
+                    opponentnick: TABLEDATA[id].guestnick,
+                    seat: 'host',
+                    color: TABLEDATA[id].hostcolor,
+                    pass: pass,
+                    id: id
+                });             
+            } else if(TABLEDATA[id].guestpass == pass) {
+                res.render('game', {
+                    mynick: TABLEDATA[id].guestnick,
+                    opponentnick: TABLEDATA[id].hostnick,
+                    seat: 'guest',
+                    color: !TABLEDATA[id].hostcolor,
+                    pass: pass,
+                    id: id
+                });   
             } else {
-                res.render('error', {msg: 'Szukana strona nie istnieje.'});
-            }
-        });
-
-        app.post('/tables/:id', (req, res) => {
-            var id = req.params.id;
-
-            if(TABLEDATA[id]) { // table exists
                 res.render('game', {
                     hostnick: TABLEDATA[id].hostnick,
                     guestnick: TABLEDATA[id].guestnick,
-                        
+                    seat: 'spectator'
                 });
-                if(!TABLEDATA[id].guestpass) { // there is no second player yet
-                    TABLEDATA[id].guestpass = token();                    
-                    TABLEDATA[id].guestname = req.cookies.username;
-                    TABLEDATA[id].guestnick = req.cookies.nickname;
-                    if(!TABLEDATA[id].hostcolor) TABLEDATA[id].hostcolor = (Math.random() < 0.5);
-                    res.render('game', { 
-                        hostnick: TABLEDATA[id].hostnick,
-                        guestnick: TABLEDATA[id].guestnick,
-                        pass: TABLEDATA[id].guestpass
-                    });
-                } else {
-                    res.render('error', {msg: 'Stół jest zajęty.'});
-                }
-            } else {
-                res.render('error', {msg: 'Szukany stół nie istnieje.'});
+            }
+        } else {
+            res.render('error', {msg: 'Szukana strona nie istnieje.'});
+        }
+    });
+
+    
+    /**
+     *  When user connects to the 'tables' socket through:
+     *      var socket = io('/table');
+     *  he calls this function below with his socket
+     */
+    tables.on('connection', function(socket) { // TODO
+        console.log("connected to tables: " + socket.id);
+        socket.emit('update-list', converttables());
+    });
+
+    games.on('connection', function(socket) {
+        socket.on('connect host', function(data) {
+            if(TABLEDATA[data.id] && TABLEDATA[data.id].hostnick == data.nick && TABLEDATA[data.id].hostpass == data.pass) {
+                TABLEDATA[data.id].hostsocket = socket;
+                socket.emit('connect response', {success: true});
+                socket.emit('gamestate', TABLEDATA[data.id].gamefile);
+            } else {                
+                socket.emit('connect response', {success: false});
             }
         });
 
-        app.get('/tables/:id', (req, res) => {
-            if(TABLEDATA[req.params.id]) {
-                res.render('game');
-            } else {
-                res.end('error');
+        socket.on('connect guest', function(data) {
+            if(TABLEDATA[data.id] && TABLEDATA[data.id].guestnick == data.nick && TABLEDATA[data.id].guestpass == data.pass) {
+                TABLEDATA[data.id].guestsocket = socket;
+                socket.emit('connect response', {success: true});
+                socket.emit('gamestate', TABLEDATA[data.id].gamefile);
+            } else {                
+                socket.emit('connect response', {success: false});
             }
-            // spectate a table, or play
-            // req.params.id - table's ID
-            res.end();
+
+        });
+        
+        socket.on('move', function(data) {
+            // validate move
+            executeMove(TABLEDATA[data.id].gamefile, data.move);
+            if(TABLEDATA[data.id].guestpass == data.pass || TABLEDATA[data.id].hostpass == data.pass) {
+                console.log('success');
+                TABLEDATA[data.id].hostsocket.emit('gamestate', TABLEDATA[data.id].gamefile);
+                TABLEDATA[data.id].guestsocket.emit('gamestate', TABLEDATA[data.id].gamefile);
+            }
         });
 
+        socket.on('connect spectator', function(data) {
 
-        /**
-         *  When user connects to the 'tables' socket through:
-         *      var socket = io('/table');
-         *  he calls this function below with his socket
-         */
-        tables.on('connection', function(socket) { // TODO
-            console.log("connected to tables: " + socket.id);
-            socket.emit('update-list', converttables());
         });
-
-        games.on('connection', function(socket) {
-            socket.on('connect:host', function(data) {
-                console.log('connected host');
-                if(TABLEDATA[data.id] && TABLEDATA[data.id].hostnick === data.nick && TABLEDATA[data.id].hostpass === data.pass) {
-                    TABLEDATA[data.id].hostsocket = socket.id;
-                    socket.emit('connect:resp')
-                } else {
-
-                }
-            })
-            socket.on('connect:guest', function(data) {
-                TABLEDATA[data].guestsocket = socket.id;
-                if(!TABLEDATA[data].hostsocket) {
-                    socket.emit('wait');
-                } else {
-                    io.to(TABLEDATA[data].hostsocket).emit('guest-joined', {
-                        guestname: TABLEDATA[data].guestnick
-                    })
-                }
-            });
-        });
-    }
-
+    });
 }

@@ -2,94 +2,80 @@
  * funkcje użytkowe
  */
 
-function moves(game, color, promoted) {
+function* movesIterator(color, promoted) {
     if(promoted) {
-        return function*() {
-            yield [game.flyingKings, -1, -1];
-            yield [game.flyingKings, -1,  1];
-            yield [game.flyingKings,  1, -1];
-            yield [game.flyingKings,  1,  1];    
-        }
+        yield [GAME.flyingKings, -1, -1];
+        yield [GAME.flyingKings, -1,  1];
+        yield [GAME.flyingKings,  1, -1];
+        yield [GAME.flyingKings,  1,  1];    
     } else if(color) {
-        return function*() {
+        yield [false,  1, 1];
+        yield [false, -1, 1];
+    } else {
+        yield [false, -1, -1];
+        yield [false,  1, -1];
+    }
+}
+
+function* capturesIterator(color, promoted) {
+    if(promoted) {
+        yield [GAME.flyingKings, -1, -1];
+        yield [GAME.flyingKings, -1,  1];
+        yield [GAME.flyingKings,  1, -1];
+        yield [GAME.flyingKings,  1,  1]; 
+    } else {
+        if(GAME.backwardCapture) {
+            yield [false, -1, -1];
+            yield [false, -1,  1];
+            yield [false,  1, -1];
+            yield [false,  1,  1]; 
+        } else if(color) {
             yield [false,  1, 1];
             yield [false, -1, 1];
-        };
-    } else {
-        return function*() {
+        } else {
             yield [false, -1, -1];
             yield [false,  1, -1];
         }
     }
 }
 
-function captures(game, color, promoted) {
-    if(promoted) {
-        return function*() {
-            yield [game.flyingKings, -1, -1];
-            yield [game.flyingKings, -1,  1];
-            yield [game.flyingKings,  1, -1];
-            yield [game.flyingKings,  1,  1]; 
-        }
-    } else {
-        if(game.backwardCapture) {
-            return function*() {
-                yield [false, -1, -1];
-                yield [false, -1,  1];
-                yield [false,  1, -1];
-                yield [false,  1,  1]; 
-            }
-        } else if(color) {
-            return function*() {
-                yield [false,  1, 1];
-                yield [false, -1, 1];
-            };
-        } else {
-            return function*() {
-                yield [false, -1, -1];
-                yield [false,  1, -1];
-            }
-        }
-    }
-}
-
-function promotionZone(game, piece) {
+function promotionZone(piece) {
     if(piece.color) {
-        return piece.y == game.height - 1;
+        return piece.y == GAME.height - 1;
     } else {
         return piece.y == 0;
     }
 }
 
-function getPieceId(game, x, y) {
-    for(var i = 0; i < game.pieceCount; i++)
-    if(game.pieces[i].x == x && game.pieces[i].y == y)
+function getPieceId(x, y) {
+    for(var i = 0; i < GAME.pieceCount; i++)
+    if(GAME.pieces[i].x == x && GAME.pieces[i].y == y)
         return i;
     return undefined;
 }
 
-function getPiece(game, x, y) {
-    var id = getPieceId(game, x, y);
-    return id ? game.pieces[id] : undefined;
+function getPiece(x, y) {
+    var id = getPieceId(x, y);
+    return id ? GAME.pieces[id] : undefined;
 }
 
-function isOccupied(game, x, y) {
-    return getPieceId(game, x, y) === undefined;
+function isFree(x, y) {
+    return x >= 0 && x < GAME.width && y >= 0 && y < GAME.height && getPieceId(x, y) === undefined;
 }
 
-function removePiece(game, piece) {
-    game.pieces.splice(game.pieces.indexOf(piece), 1);
-    game.pieceCount--;
+function removePiece(piece) {
+    GAME.pieces.splice(GAME.pieces.indexOf(piece), 1);
+    GAME.pieceCount--;
 }
 
-function getMoves(game, piece) {
+function getMoves(piece) {
     if(!piece) return [];
     availableMoves = [];
-    for(var move of moves(game, piece.color, piece.promoted)) {
+    for(var move of movesIterator(piece.color, piece.promoted)) {
         if(move[0]) { // long move
             var i = 1;
             var capX, capY;
-            while(!isOccupied(game, piece.x + i * move[1], piece.y + i * move[2])) { // square is not occupied
+            while(isFree(piece.x + i * move[1], piece.y + i * move[2])) { // square is not occupied
                 availableMoves.push({
                     piece: piece,
                     toX  : piece.x + move[1] * i,
@@ -99,7 +85,7 @@ function getMoves(game, piece) {
                 i++;
             }
         } else { // short move
-            if(!isOccupied(game, piece.x + move[1], piece.y + move[2])) { // square is not occupied
+            if(isFree(piece.x + move[1], piece.y + move[2])) { // square is not occupied
                 availableMoves.push({
                     piece: piece,
                     toX  : piece.x + move[1],
@@ -112,25 +98,25 @@ function getMoves(game, piece) {
     return availableMoves;
 }
 
-function getCaptures(game, piece) {
+function getCaptures(piece) {
     if(!piece) return [];
     availableCaptures = [];
-    for(var capture of captures(game, piece.color, piece.promoted)) {
+    for(var capture of capturesIterator(piece.color, piece.promoted)) {
         if(capture[0]) { // long capture
 
             var i = 1;
 
-            while(!isOccupied(game, piece.x + i * move[1], piece.y + i * move[2])) i++; // square is not occupied
+            while(isFree(piece.x + i * capture[1], piece.y + i * capture[2])) i++; // square is not occupied
 
-            var captured_piece = getPiece(game, piece.x + i * move[1], piece.y + i * move[2]);
+            var captured_piece = getPiece(piece.x + i * capture[1], piece.y + i * capture[2]);
 
             if(captured_piece !== undefined && captured_piece.color != piece.color) { // piece is of opposite color
                 i++;
-                while(!isOccupied(game, piece.x + i * move[1], piece.y + i * move[2])) { // spot available
+                while(isFree(piece.x + i * capture[1], piece.y + i * capture[2])) { // spot available
                         availableCaptures.push({
                             piece: piece,
-                            toX  : piece.x + move[1] * i,
-                            toY  : piece.y + move[2] * i,
+                            toX  : piece.x + capture[1] * i,
+                            toY  : piece.y + capture[2] * i,
                             capture: true,
                             captured: captured_piece
                         });
@@ -138,14 +124,14 @@ function getCaptures(game, piece) {
                 }
             }
         } else { // short capture
-            var captured_piece = getPiece(game, piece.x + move[1], piece.y + move[2]);
+            var captured_piece = getPiece(piece.x + capture[1], piece.y + capture[2]);
 
             if(captured_piece !== undefined && captured_piece.color != piece.color) { // there is a piece to capture of opposite colour
-                if(!isOccupied(game, piece.x + 2 * move[1], piece.y + 2 * move[2])) { // there is a free spot
+                if(isFree(piece.x + 2 * capture[1], piece.y + 2 * capture[2])) { // there is a free spot
                     availableCaptures.push({
                         piece: piece,
-                        toX  : piece.x + move[1] * 2,
-                        toY  : piece.y + move[2] * 2,
+                        toX  : piece.x + capture[1] * 2,
+                        toY  : piece.y + capture[2] * 2,
                         capture: true,
                         captured: captured_piece
                     });
@@ -156,32 +142,90 @@ function getCaptures(game, piece) {
     return availableCaptures;
 }
 
+var GAME;   
+var BOARD;
+
 /**
  * funkcje do renderowania widoku gry
  */
-function render(game) {
-    board = document.getElementById('board');
-    
+function clearPieces() {
     // clear board
-    var pieces = document.getElementsByClassName('piece');
-    for (piece in pieces) {
-        board.removeChild(piece);
-    }
-
-    var pieces = [];
-    for(var piece in game.pieces) {
-        pieces.push(document.createElement('piece'));
-    
-        pieces[pieces.length - 1].className = 
-            (piece.color ? 'white-' : 'black-') + 
-            (piece.promoted ? 'king' : 'man')
-        pieces[pieces.length - 1].style.transform = 
-            `translate(${piece.x * 64}px, ${piece.y * 64}px)`;
-        set_piece(pieces[pieces.length - 1]);
-        board.appendChild(pieces[pieces.length - 1]);
+    var pieces = document.getElementsByTagName('piece');
+    for (var i = pieces.length - 1; i >= 0; i--) {
+        pieces[i].parentNode.removeChild(pieces[i]);
     }
 }
 
-document.onload = function() {
-    
+function clearHighlights() {
+    var highlights = document.getElementsByClassName('highlight');
+    for (var i = highlights.length - 1; i >= 0; i--) {
+        highlights[i].parentNode.removeChild(highlights[i]);
+    }
+}
+
+function render() {
+    console.log(GAME);
+    clearPieces();
+
+    var pieces = [];
+    for(var piece of GAME.pieces) {
+        pieces.push(document.createElement('piece'));
+        
+        pieces[pieces.length - 1].className = (piece.color ? 'white-' : 'black-') + (piece.promoted ? 'king' : 'man')
+        pieces[pieces.length - 1].style.transform = `translate(${mycolor ? (7 - piece.x) * 64 : piece.x * 64}px, ${mycolor ? (7 - piece.y) * 64 : piece.y * 64}px)`;
+        pieces[pieces.length - 1].piece = piece;
+        pieces[pieces.length - 1].addEventListener('click', function() {
+            clearHighlights();
+            var moves = getMoves(this.piece);
+            var captures = getCaptures(this.piece);
+            console.log(captures);
+            for(var m of moves) {
+                createHighlight(m);
+            }
+            for(var c of captures) {
+                createHighlight(c);
+            }
+        });
+        BOARD.appendChild(pieces[pieces.length - 1]);
+    }
+}
+
+function sendMove(move) {
+    if(move.piece.color != mycolor) {
+        console.log("Wrong color");
+    } else
+    if(move.piece.color != GAME.currentTurn) {
+        console.log("Wrong turn");
+    } else 
+    if(GAME.activePiece != undefined && (move.piece.x != GAME.activePiece.x || move.piece.y != GAME.activePiece.y)) {
+        console.log("You must continue capturing");
+    } else {
+        console.log(move);
+        socket.emit('move', {move: move, id: id, pass: pass});
+    }
+}
+
+function createHighlight(move) {
+    var h = document.createElement('piece');
+    h.className = 'highlight';
+    h.style.transform = `translate(${mycolor ? (7 - move.toX) * 64 : move.toX * 64}px, ${mycolor ? (7 - move.toY) * 64 : move.toY * 64}px)`;
+    h.move = move;
+    h.addEventListener('click', function() { sendMove(this.move); });
+    BOARD.appendChild(h);
+}
+
+var socket = io('/games');
+
+socket.on('connect response', function(data) {
+    console.log(data.success);
+});
+
+socket.on('gamestate', function(data) {
+    GAME = data;
+    render();
+})
+
+window.onload = function() {
+    BOARD = document.getElementById('board');
+    socket.emit('connect ' + seat, {id: id, nick: mynick, pass: pass});
 }

@@ -43,5 +43,5 @@ server.listen(3000);
 
 console.log("Server started!");
 
-require("./js/tables.js").init(io, app);
+require("./js/tables.js")(io, app);
 // require("/js/game.js").init(io, app);

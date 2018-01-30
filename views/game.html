@@ -6,8 +6,12 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <script src="/socket.io/socket.io.js"></script>
     <script>
-    var tableId = '<%= locals.tableId %>';
-    var socket = io();
+    var mynick = '<%= locals.mynick %>';
+    var opponentnick = '<%= locals.opponentnick %>';
+    var mycolor = <%= locals.color %>;
+    var id = '<%= locals.id %>';
+    var pass = '<%= locals.pass %>';
+    var seat = '<%= locals.seat %>';
     </script>
     <script src="../scripts/game.js"></script>
     <link rel="stylesheet" href="../styles/game-styles.css"/>
