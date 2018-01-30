@@ -287,7 +287,6 @@ function executeMove(game, move) {
     }
     if(move.capture) {
         removePiece(game, getPiece(game, move.captured.x, move.captured.y));
-        console.log(getCaptures(game, piece));
         if(game.fullCapture && (getCaptures(game, piece).length > 0)) {
             game.activePiece = piece;
         } else {

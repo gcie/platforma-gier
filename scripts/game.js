@@ -164,7 +164,6 @@ function clearHighlights() {
 }
 
 function render() {
-    console.log(GAME);
     clearPieces();
 
     var pieces = [];
@@ -178,7 +177,6 @@ function render() {
             clearHighlights();
             var moves = getMoves(this.piece);
             var captures = getCaptures(this.piece);
-            console.log(captures);
             for(var m of moves) {
                 createHighlight(m);
             }
@@ -200,7 +198,6 @@ function sendMove(move) {
     if(GAME.activePiece != undefined && (move.piece.x != GAME.activePiece.x || move.piece.y != GAME.activePiece.y)) {
         console.log("You must continue capturing");
     } else {
-        console.log(move);
         socket.emit('move', {move: move, id: id, pass: pass});
     }
 }
