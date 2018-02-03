@@ -23,8 +23,8 @@ let gen = gener;
 
 module.exports = ({
     authorize : function (req,res,next) {
-        if ( req.cookies.user ) {
-            var usr = req.cookies.user.split('&');
+        if ( req.signedCookies.user ) {
+            var usr = req.signedCookies.user.split('&');
             if(usr[0][0] != '@') {
                 req.user = {
                     login : usr[0],
@@ -63,6 +63,7 @@ module.exports = ({
             }
             return isallowed;
         };
+        app.use( cookieParser('9877dg9fb8sd79b87sdt9b87ds98b') );
         app.get('/login', (req,res) => {
             res.render('login', {message : ''});
         });
@@ -87,7 +88,7 @@ module.exports = ({
                     {
                         res.render('login', { message : 'Incorrect username or password' });
                     } else {
-                        res.cookie('user', result.login + '&' + result.username + '&' + result.password + '&' + result.wins + '&' + result.losses + '&' + result.draws);
+                        res.cookie('user', result.login + '&' + result.username + '&' + result.password + '&' + result.wins + '&' + result.losses + '&' + result.draws, {signed : true});
                         res.redirect('/');
                     }
                 });
@@ -134,7 +135,7 @@ module.exports = ({
             {
                 var ident = ID();
                 console.log(ident);
-                res.cookie('user', ident + '&' + req.username);
+                res.cookie('user', ident + '&' + req.username, {signed:true});
                 res.redirect('/');
             } else {
                 res.render('anonymous', {message :'Nickname should have from 6 to 20 symbols containing letters from english alphabet or numbers'})

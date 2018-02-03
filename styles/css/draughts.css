@@ -222,8 +222,8 @@ figure {
 .table .table-row {
     display: table-row;
     position: relative;
-    width: 510px;
-    height: 170px;
+    width: 100%;
+    height: 100%;
     margin:auto;
 }
 
@@ -285,39 +285,32 @@ figure {
 .sf-menu ul li {
   background: transparent;
 }
-/*
-.sf-arrows .sf-with-ul {
-  padding-right: 2.5em;
-  *padding-right: 1em;
+
+.create {
+    display: flex;
+    width:512px;
+    margin: auto;
 }
 
-.sf-arrows .sf-with-ul:after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  right: 1em;
-  margin-top: -3px;
-  height: 0;
-  width: 0;
-  border: 5px solid transparent;
-  border-top-color: #ccc;
+
+.create .desc {   
+    width:256px;
+    padding:25px;
+    background: rgb(255, 255, 255);
 }
 
-.sf-arrows > li > .sf-with-ul:focus:after,
-.sf-arrows > li:hover > .sf-with-ul:after,
-.sf-arrows > .sfHover > .sf-with-ul:after {
-  border-top-color: #ccc;
+
+.create .desc a {
+    position:relative;
+    letter-spacing: 0;
+    font-size: 16px;
+    line-height:10px;
+    color: #000000 !important;
+    background: #ffffff !important;
+    text-transform: none;
 }
 
-.sf-arrows ul .sf-with-ul:after {
-  margin-top: -5px;
-  margin-right: -3px;
-  border-color: transparent;
-  border-left-color: #ccc;
+.create .desc a:hover {
+    background: rgb(0, 0, 0) !important;
+    color: #fff !important;
 }
-
-.sf-arrows ul li > .sf-with-ul:focus:after,
-.sf-arrows ul li:hover > .sf-with-ul:after,
-.sf-arrows ul .sfHover > .sf-with-ul:after {
-  border-left-color: #ccc;
-}*/
