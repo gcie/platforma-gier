@@ -112,6 +112,18 @@ figure {
     height: 75px;
 }
 
+.nav-header input[type=submit] {
+    position: relative;
+    padding: 0.15em 1em;
+    border: none;
+    color: #000;
+    background: #fff;
+}
+.nav-header input[type=submit]:hover {
+    color: #fff;
+    background: #000;
+}
+
 .nav-toggle {
     margin-top: -8px !important;
     cursor: pointer;
@@ -311,6 +323,27 @@ figure {
 }
 
 .create .desc a:hover {
+    background: rgb(0, 0, 0) !important;
+    color: #fff !important;
+}
+
+.newacc {
+    width:256px;
+    position:relative;
+    margin:auto
+}
+
+.newacc a{
+    position:relative;
+    letter-spacing: 0;
+    font-size: 16px;
+    line-height:10px;
+    color: #000000 !important;
+    background: #ffffff !important;
+    text-transform: none;
+}
+
+.newacc a:hover {
     background: rgb(0, 0, 0) !important;
     color: #fff !important;
 }

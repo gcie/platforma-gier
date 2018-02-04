@@ -1,13 +1,32 @@
-<html>
+<!DOCTYPE html>
+<head>
+	<meta charset="utf-8">
+	<title>MyDraughts</title>
+	<link rel="stylesheet" href="../styles/css/bootstrap.css">
+	<link rel="stylesheet" href="../styles/css/superfish.css">
+    <link rel="stylesheet" href="../styles/css/draughts.css">
+    <script>
+        
+    </script>
+</head>
 <body>
-    <form method='POST'>
-        <div>Login: <input type="text" required="required" name='username' /></div>
-        <div>Password: <input type='password' required="required" name='pwd' /></div>
-        <div>Repeat password: <input type='password' required="required" name='pwd2' /></div>
-        <input type = 'submit' value = 'Login'/>
-    </form>
-    <div>
-        <%= message %>
+    <div id="header">
+        <header id="header-section">
+            <div class="container">
+                <div class="nav-header">
+                    <h1 id="logo"><a>Draughts</a></h1>
+                </div>
+            </div>
+        </header>		
     </div>
+    <div class='newacc'>
+        <form method='POST'>
+            <p><h3>Create new account</h3></p>
+            <p style='padding-top:1em'><input type="text" placeholder='Login' required name = 'username'style='float: left'></input></p>
+            <p style='padding-top:1em'><input type="password" placeholder= 'Password' required name='pwd' style='float: left'></input></p>
+            <p style='padding-top:1em'><input type="password" placeholder= "Repeat password" required name='pwd2' style='float: left'></input></p>
+            <p style='padding-top:2em'><a action='submit' style='padding:1em 88px;top:1em' >Create</a></p>
+        </form>
+    </div>
+    <%=message%>
 </body>
-</html>

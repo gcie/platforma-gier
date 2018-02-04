@@ -1,11 +1,30 @@
-<html>
+<!DOCTYPE html>
+<head>
+	<meta charset="utf-8">
+	<title>MyDraughts</title>
+	<link rel="stylesheet" href="../styles/css/bootstrap.css">
+	<link rel="stylesheet" href="../styles/css/superfish.css">
+    <link rel="stylesheet" href="../styles/css/draughts.css">
+    <script>
+        
+    </script>
+</head>
 <body>
-    <form method='POST'>
-        nick: <input type="text" name='username' /> 
-        <input type = 'submit' value = 'Login'/>
-    </form>
-    <div>
-        <%= message %>
+    <div id="header">
+        <header id="header-section">
+            <div class="container">
+                <div class="nav-header">
+                    <h1 id="logo"><a>Draughts</a></h1>
+                </div>
+            </div>
+        </header>		
     </div>
+    <div class='newacc'>
+        <form method='POST'>
+            <p><h3>Pick Your nick</h3></p>
+            <p style='padding-top:1em'><input type="text" placeholder='Nick' required name = 'username'style='float: left'></input></p>
+            <p style='padding-top:2em'><a action='submit' style='padding:1em 96px;top:1em' >Play</a></p>
+        </form>
+    </div>
+    <%=message%>
 </body>
-</html>
