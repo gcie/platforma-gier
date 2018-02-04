@@ -76,6 +76,10 @@ module.exports = ({
             res.render('anonymous', {message :''});
         });
 
+        app.get('/logout', (req,res) => {
+            res.cookie('user', '', {maxAge : -1});
+            res.redirect('/');
+        });
         app.post('/login', (req, res) => {
             var user = req.body.username;
             var pwd = req.body.pwd;

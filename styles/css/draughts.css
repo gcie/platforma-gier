@@ -333,7 +333,7 @@ figure {
     margin:auto
 }
 
-.newacc a{
+.newacc button{
     position:relative;
     letter-spacing: 0;
     font-size: 16px;
@@ -341,9 +341,10 @@ figure {
     color: #000000 !important;
     background: #ffffff !important;
     text-transform: none;
+    border: none;
 }
 
-.newacc a:hover {
+.newacc button:hover {
     background: rgb(0, 0, 0) !important;
     color: #fff !important;
 }
