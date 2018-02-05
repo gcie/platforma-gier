@@ -14,7 +14,30 @@
     <script src="../scripts/tables.js"></script>
 </head>
 <body>
-    <table id='tables'>
+    <div id="header">
+        <header id="header-section">
+            <div class="container">
+                <div class="nav-header">
+                    <h1 id="logo"><a href = '/'>Draughts</a></h1>
+                    <nav id="menu-wrap" role="navigation">
+                        <ul class="sf-menu" id="primary-menu">
+                            <li>
+                                <a><%= locals.mynick.toUpperCase()%></a>
+                                <ul class="sub-menu">
+                                    <% if(locals.login.charAt(0) != '@') { %>
+                                    <li><a href = '/mystats'>Statistics</a></li>
+                                    <li><a>My account</a></li>
+                                    <% } %>
+                                    <li><a href = '/logout'>Log out</a></li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </header>		
+    </div>
+    <table id='tables' style = "width:512px;margin:auto;margin-top:70px">
     </table>    
 </body>
 </html>
