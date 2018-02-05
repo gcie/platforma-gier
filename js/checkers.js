@@ -306,7 +306,7 @@ function getState(game) {
         if(game.pieces[i].color) black = false;
         if(!game.pieces[i].color) white = false;        
     }
-    return {finished: white && black, won: white};
+    return {finished: white || black, won: white};
 }
 
 module.exports = {

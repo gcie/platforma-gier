@@ -14,6 +14,7 @@ var cookie = require('./cookie.js');
 var Game = checkers.Game;
 var executeMove = checkers.executeMove;
 var getState = checkers.getState;
+var validateMove = checkers.validateMove;
 
 function createTable(hostlogin, hostname) {
     do{ id = token(); }while( TABLEDATA[id] );
@@ -24,7 +25,8 @@ function createTable(hostlogin, hostname) {
         gametype: "Classic 8x8",
         hostcolor: (Math.random() < 0.5),
         hostpass: token(),
-        gamefile: gameclass.toJSON()
+        gamefile: gameclass.toJSON(),
+        spectatorsockets: []
     };
     return id;
 }
@@ -40,41 +42,24 @@ function joinTable(id, guestlogin, guestname) {
     }
 }
 
-var TABLEDATA = {
-    table1_id: {
-        hostlogin: 'sdfRambo', // nazwa użytkownika hosta
-        hostname: 'Rambo',
-        hostpass: 'host#gf748238d89a9f7',
-        hostsocket: 'fr23r32vgjfxr23ar',
-        guestlogin: undefined,
-        guestname: undefined,
-        guestpass: undefined,
-        guestsocket: undefined,
-        gametype: 'Classic 8x8', // rodzaj gry
-        gamefile: undefined,
-        hostcolor: true
-    },
-    table2_id: {
-        hostlogin: 'xxX_69Anthony69_Xxx',
-        hostname: 'Anthony',
-        hostpass: 'host#r3y89quda9dfuaf',
-        hostsocket: 'rqi2h93r8h8rj',
-        guestlogin: undefined,
-        guestname: undefined,
-        guestpass: undefined,
-        guestsocket: undefined,
-        gametype: 'Classic 10x10',
-        gamefile: undefined,
-        hostcolor: undefined
+var TABLEDATA = {};
+
+function sendState(id) {
+    if(TABLEDATA[id]) {
+        TABLEDATA[id].hostsocket.emit('gamestate', TABLEDATA[id].gamefile);
+        TABLEDATA[id].guestsocket.emit('gamestate', TABLEDATA[id].gamefile);
+        if(TABLEDATA[id].spectatorsokets) for(var s of TABLEDATA[id].spectatorsockets) {
+            s.emit('gamestate', TABLEDATA[id].gamefile);
+        }
     }
-};
+}
 
 function converttables() {
     var data = {};
     for(var id in TABLEDATA) {
         data[id] = {
             hostname: TABLEDATA[id].hostname,
-            guestname: TABLEDATA[id].guestname,
+            guestname: TABLEDATA[id].guestname
             //gametype: tables[id].gamefile.desc
         }
     }
@@ -150,7 +135,6 @@ module.exports = function(io, app) {
      *  he calls this function below with his socket
      */
     tables.on('connection', function(socket) { // TODO
-        console.log("connected to tables: " + socket.id);
         socket.emit('update-list', converttables());
     });
 
@@ -177,10 +161,10 @@ module.exports = function(io, app) {
         });
         
         socket.on('move', function(data) {
+            if(!TABLEDATA[data.id].hostsocket || !TABLEDATA[data.id].guestsocket) return;
             // validate move
             executeMove(TABLEDATA[data.id].gamefile, data.move);
             var state = getState(TABLEDATA[data.id].gamefile);
-            console.log(state);
             if(state.finished) {
                 if(state.won == TABLEDATA[data.id].hostcolor) {
                     // host won
@@ -193,13 +177,13 @@ module.exports = function(io, app) {
                 }
             }
             if(TABLEDATA[data.id].guestpass == data.pass || TABLEDATA[data.id].hostpass == data.pass) {
-                TABLEDATA[data.id].hostsocket.emit('gamestate', TABLEDATA[data.id].gamefile);
-                TABLEDATA[data.id].guestsocket.emit('gamestate', TABLEDATA[data.id].gamefile);
+                sendState(data.id);
             }
         });
 
         socket.on('connect spectator', function(data) {
-
+            TABLEDATA[data.id].spectatorsockets.push(socket);      
+            socket.emit('gamestate', TABLEDATA[data.id].gamefile);
         });
     });
 }
