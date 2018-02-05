@@ -7,7 +7,7 @@
 
 const cookieParser = require('cookie-parser');
 const pgp = require('pg-promise')({});
-const cn = 'postgres://postgres:dawid@localhost:5432/postgres';
+const cn = process.env.DATABASE_URL ? process.env.DATABASE_URL : 'postgres://postgres:dawid@localhost:5432/postgres';
 const db = pgp(cn);
 const bcrypt = require('bcrypt');
 
