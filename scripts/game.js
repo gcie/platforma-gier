@@ -195,7 +195,7 @@ function sendMove(move) {
     if(move.piece.color != GAME.currentTurn) {
         console.log("Wrong turn");
     } else 
-    if(GAME.activePiece != undefined && (move.piece.x != GAME.activePiece.x || move.piece.y != GAME.activePiece.y)) {
+    if(GAME.activePiece != undefined && (move.piece.x != GAME.activePiece.x || move.piece.y != GAME.activePiece.y || move.capture == false)) {
         console.log("You must continue capturing");
     } else {
         socket.emit('move', {move: move, id: id, pass: pass});
@@ -224,16 +224,27 @@ socket.on('gamestate', function(data) {
 
 socket.on('game-end', function(data) {
     setTimeout(() => {
-        window.location.href = data ? '/victory' : '/defeat';
-    }, 3000);
+        window.alert(data.msg);
+    }, 1000);
 });
+
+socket.on('move-error', function(data) {
+    window.alert(data);
+})
 
 window.onload = function() {
     BOARD = document.getElementById('board');
     document.getElementById('bt-leave').onclick = function() {
-        socket.emit('disconnect ' + seat);
+        socket.emit('disconnect ' + seat, {id: id, name: mynick, pass: pass});
         window.location.href = "/";
     }
-    console.log('connect ' + seat);
     socket.emit('connect ' + seat, {id: id, name: mynick, pass: pass});
+}
+
+window.onbeforeunload = function(e) {
+    e.returnValue = "Hello!";
+}
+
+window.onunload = function() {
+    socket.emit('disconnect ' + seat, {id: id, name:mynick, pass: pass});
 }

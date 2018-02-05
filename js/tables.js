@@ -46,7 +46,7 @@ function sendState(id) {
     if(TABLEDATA[id]) {
         TABLEDATA[id].hostsocket.emit('gamestate', TABLEDATA[id].gamefile);
         TABLEDATA[id].guestsocket.emit('gamestate', TABLEDATA[id].gamefile);
-        if(TABLEDATA[id].spectatorsokets) for(var s of TABLEDATA[id].spectatorsockets) {
+        if(TABLEDATA[id].spectatorsockets) for(var s of TABLEDATA[id].spectatorsockets) {
             s.emit('gamestate', TABLEDATA[id].gamefile);
         }
     }
@@ -57,8 +57,8 @@ function converttables() {
     for(var id in TABLEDATA) {
         data[id] = {
             hostname: TABLEDATA[id].hostname,
-            guestname: TABLEDATA[id].guestname
-            //gametype: tables[id].gamefile.desc
+            guestname: TABLEDATA[id].guestname,
+            gametype: TABLEDATA[id].gametype
         }
     }
     return data;
@@ -121,6 +121,8 @@ module.exports = function(io, app) {
                     mynick: TABLEDATA[id].hostname,
                     opponentnick: TABLEDATA[id].guestname,
                     seat: 'spectator',
+                    color: false,
+                    id: id,
                     login: req.user.login
                 });
             }
@@ -160,25 +162,45 @@ module.exports = function(io, app) {
             }
 
         });
+
+        socket.on('disconnect guest', function(data) {
+            if(TABLEDATA[data.id] && TABLEDATA[data.id].guestpass == data.pass) {
+                TABLEDATA[data.id].hostsocket.emit('game-end', {msg:'Your opponent left!'});
+                delete TABLEDATA[data.id];
+            }
+        });
         
+        socket.on('disconnect host', function(data) {
+            if(TABLEDATA[data.id] && TABLEDATA[data.id].hostpass == data.pass) {
+                TABLEDATA[data.id].guestsocket.emit('game-end', {msg: 'Your opponent left!'});
+                delete TABLEDATA[data.id];
+            }
+        });
+
         socket.on('move', function(data) {
+            if(!TABLEDATA[data.id]) return;
             if(!TABLEDATA[data.id].hostsocket || !TABLEDATA[data.id].guestsocket) return;
-            // validate move
+            if((err = validateMove(TABLEDATA[data.id].gamefile, data.move)) != "") {
+                socket.emit('move-error', err);
+                return;
+            }
             executeMove(TABLEDATA[data.id].gamefile, data.move);
+            if(TABLEDATA[data.id].guestpass == data.pass || TABLEDATA[data.id].hostpass == data.pass) {
+                sendState(data.id);
+            }
+
             var state = getState(TABLEDATA[data.id].gamefile);
             if(state.finished) {
                 if(state.won == TABLEDATA[data.id].hostcolor) {
                     // host won
-                    TABLEDATA[data.id].hostsocket.emit('game-end', true);
-                    TABLEDATA[data.id].guestsocket.emit('game-end', false);
+                    TABLEDATA[data.id].hostsocket.emit('game-end', {msg: 'Victory!'});
+                    TABLEDATA[data.id].guestsocket.emit('game-end', {msg: 'Defeat!'});
                 } else {
                     // guest won
-                    TABLEDATA[data.id].hostsocket.emit('game-end', false);
-                    TABLEDATA[data.id].guestsocket.emit('game-end', true);
+                    TABLEDATA[data.id].hostsocket.emit('game-end', {msg: 'Victory!'});
+                    TABLEDATA[data.id].guestsocket.emit('game-end', {msg: 'Defeat!'});
                 }
-            }
-            if(TABLEDATA[data.id].guestpass == data.pass || TABLEDATA[data.id].hostpass == data.pass) {
-                sendState(data.id);
+                delete TABLEDATA[data.id];
             }
         });
 

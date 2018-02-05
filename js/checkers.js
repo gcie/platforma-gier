@@ -264,18 +264,31 @@ function getCaptures(game, piece) {
 }
 
 function validateMove(game, move) {
-    if(game.currentTurn != move.piece.color) return false; // wrong turn
-    if(!game.pieces.includes(move.piece)) return false; // no such piece
-    var moves = getMoves(game, move.piece);
-    var captures = getCaptures(game, move.piece);
-    if(!moves.includes(move) && !captures.includes(move)) return false; // not available
-    return true;
+    if(!getPiece(game, move.piece.x, move.piece.y)) return "Moving piece does not exist";
+    piece = getPiece(game, move.piece.x, move.piece.y);
+    if(game.currentTurn != move.piece.color) return "Wrong turn"; // wrong turn
+    if(game.activePiece) {
+        if(game.activePiece != piece) return "You must continue capture";
+        if(!move.capture) return "You must capture";
+    }
+    var moves = getMoves(game, piece);
+    var captures = getCaptures(game, piece);
+    if(!contains(moves, move) && !contains(captures, move)) return "Such move is not available"; // not available
+    return "";
+}
+
+function contains(moves, move) {
+    for(var m of moves) {
+        if(JSON.stringify(m) == JSON.stringify(move)) return true;
+    }
+    return false;
 }
 
 function executeMove(game, move) {
     var piece = getPiece(game, move.piece.x, move.piece.y);
     piece.x = move.toX;
     piece.y = move.toY;
+    if(move.capture) removePiece(game, getPiece(game, move.captured.x, move.captured.y));
     if(promotionZone(game, piece)) {
         if(move.capture) {
             if(game.promotionOnTheFly || !game.fullCapture || (getCaptures(game, piece).length == 0)) {
@@ -285,14 +298,8 @@ function executeMove(game, move) {
             piece.promoted = true;
         }
     }
-    if(move.capture) {
-        removePiece(game, getPiece(game, move.captured.x, move.captured.y));
-        if(game.fullCapture && (getCaptures(game, piece).length > 0)) {
+    if(move.capture && game.fullCapture && (getCaptures(game, piece).length > 0)) {
             game.activePiece = piece;
-        } else {
-            game.currentTurn = !game.currentTurn;
-            game.activePiece = undefined;
-        }
     } else {
         game.currentTurn = !game.currentTurn;        
         game.activePiece = undefined;

@@ -5,16 +5,16 @@ function spectate(tableId) {
 }
 
 function buildTable(data) {
-    var res = "<tr><th>Hostname</th><th>Guestname</th><th>Game type</th><th></th></tr>";
+    var res = "<tr><th>Host</th><th>Guest</th><th>Game type</th><th></th></tr>";
     for(var table in data) {
         res += "<tr><td>" + data[table].hostname + "</td><td>";
         if(data[table].guestname) {
-            res += data[table].guestname + "</td><td>" + data[table].gametype + "</td><td>" + "<button onclick='spectate(" + '"' + table + '"' +  ")'>Oglądaj</button></td>";
+            res += data[table].guestname + "</td><td>" + data[table].gametype + "</td><td>" + "<button onclick='spectate(" + '"' + table + '"' +  ")'>Spectate</button></td>";
         } else {
-            res += "-</td><td>" + data[table].gametype + "</td><td>" + "<button onclick='joinTable(" + '"' + table + '"' + ")'>Dołącz</button></td></tr>";
+            res += "-</td><td>" + data[table].gametype + "</td><td>" + "<button onclick='joinTable(" + '"' + table + '"' + ")'>Join</button></td></tr>";
         }
     }
-    document.getElementById('tables').innerHTML = res;
+    document.getElementById('tb-tables').innerHTML = res;
 }
 
 function joinTable(tableId) {

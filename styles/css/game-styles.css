@@ -1,12 +1,12 @@
 .board10 {
-    background-image: url("../img/board10.png");
+    background-image: url("../../img/board10.png");
     width: 640px;
     height: 640px;
     position: relative;
 }
 
 .board8 {
-    background-image: url("../img/board10.png");
+    background-image: url("../../img/board10.png");
     width: 512px;
     height: 512px;
     position: relative;
@@ -21,19 +21,19 @@
 }
 
 .black-king {
-    background-image: url("../img/black_king.png");
+    background-image: url("../../img/black_king.png");
 }
 
 .black-man {
-    background-image: url("../img/black_man.png");
+    background-image: url("../../img/black_man.png");
 }
 
 .white-king {
-    background-image: url("../img/white_king.png");
+    background-image: url("../../img/white_king.png");
 }
 
 .white-man {
-    background-image: url("../img/white_man.png");
+    background-image: url("../../img/white_man.png");
 }
 
 .highlight {
