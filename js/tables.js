@@ -1,3 +1,5 @@
+import { raw } from "./C:/Users/grzec.DESKTOP-HPIK33A/AppData/Local/Microsoft/TypeScript/2.6/node_modules/@types/body-parser";
+
 // import * as http from "http" // zaremować przed uruchomieniem
 
 /**
@@ -94,7 +96,7 @@ module.exports = function(io, app) {
         }
     });
 
-    app.get('/tables/:id', (req, res) => {
+    app.get('/tables/:id', cookie.authorize, (req, res) => {
         var id = req.params.id;
         var pass = req.query.p;
         if(TABLEDATA[id]) {
@@ -105,7 +107,8 @@ module.exports = function(io, app) {
                     seat: 'host',
                     color: TABLEDATA[id].hostcolor,
                     pass: pass,
-                    id: id
+                    id: id,
+                    login: req.user.login
                 });             
             } else if(TABLEDATA[id].guestpass == pass) {
                 res.render('game', {
@@ -114,13 +117,15 @@ module.exports = function(io, app) {
                     seat: 'guest',
                     color: !TABLEDATA[id].hostcolor,
                     pass: pass,
-                    id: id
+                    id: id,
+                    login: req.user.login
                 });   
             } else {
                 res.render('game', {
                     mynick: TABLEDATA[id].hostname,
                     opponentnick: TABLEDATA[id].guestname,
-                    seat: 'spectator'
+                    seat: 'spectator',
+                    login: req.user.login
                 });
             }
         } else {
