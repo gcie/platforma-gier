@@ -7,10 +7,6 @@
     <link rel="stylesheet" href="../styles/css/superfish.css">
     <link rel="stylesheet" href="../styles/css/draughts.css">
     <script src="/socket.io/socket.io.js"></script>
-    <script>
-        var nick = '<%= locals.nick %>';
-        var login = '<%= locals.login %>';
-    </script>
     <script src="../scripts/tables.js"></script>
 </head>
 <body>
@@ -22,7 +18,7 @@
                     <nav id="menu-wrap" role="navigation">
                         <ul class="sf-menu" id="primary-menu">
                             <li>
-                                <a><%= locals.mynick.toUpperCase()%></a>
+                                <a><%= locals.username.toUpperCase()%></a>
                                 <ul class="sub-menu">
                                     <% if(locals.login.charAt(0) != '@') { %>
                                     <li><a href = '/mystats'>Statistics</a></li>
