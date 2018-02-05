@@ -5,7 +5,7 @@
 	<link rel="stylesheet" href="../styles/css/bootstrap.css">
 	<link rel="stylesheet" href="../styles/css/superfish.css">
     <link rel="stylesheet" href="../styles/css/draughts.css">
-    <script
+    <script src='../scripts/tables.js'></script>
 </head>
 <body>
     <div id="header">
@@ -32,53 +32,53 @@
     <div class ="table">
 		<div class="table-row">
 			<div class="table-elem">
-			<a>
-				cośtam
-			</a>
+                <button onclick = createTable("classic8x8") >
+                    Classic8x8
+                </button>
 			</div>
 			<div class="table-elem">
-				<a>
-					cośtam
-				</a>
-			</div>
-			<div class="table-elem">
-				<a>
-					cośtam
-				</a>
-			</div>
-		</div>
-		<div class="table-row">
-			<div class="table-elem">
-				<a>
-					cośtam
-				</a>
-			</div>
-			<div class="table-elem">
-				<a>
-					cośtam
-				</a>
-			</div>
-			<div class="table-elem">
-				<a>
-					cośtam
-				</a>
+				<button onclick = createTable("classic10x10") >
+					Classic10x10
+				</button>
+            </div>
+            <div class="table-elem">
+				<button onclick = createTable("english8x8")>
+					English8x8
+				</button>
 			</div>
 		</div>
 		<div class="table-row">
 			<div class="table-elem">
-				<a>
-					cośtam
-				</a>
+				<button onclick = createTable("russian8x8")>
+					Russian8x8
+				</button>
 			</div>
 			<div class="table-elem">
-				<a>
-					cośtam
-				</a>
+				<button href = '/tables' >
+					Tables
+				</button>
 			</div>
 			<div class="table-elem">
-				<a>
-					cośtam
-				</a>
+				<button onclick = createTable("english10x10")>
+					English10x10
+				</button>
+			</div>
+		</div>
+		<div class="table-row">
+			<div class="table-elem">
+				<button onclick = createTable("russian10x10") >
+					Russian10x10
+				</button>
+			</div>
+			<div class="table-elem">
+				<button onclick = createTable("american8x8")>
+					American8x8
+                </button>
+			</div>
+			<div class="table-elem">
+				<button onclick = createTable("american10x10")>
+					American10x10
+                </button>
 			</div>
 		</div>
 	</div>

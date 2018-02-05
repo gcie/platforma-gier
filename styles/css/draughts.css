@@ -244,23 +244,20 @@ figure {
     width:170px;
     height:170px;
     font-size: 16px;
-    padding:55px 75px;
 }
 
-.table .table-row .table-elem a {
-    padding-top: 75px;
-    padding-bottom: 75px;
-    padding-left: 55px;
-    padding-right: 55px;
+.table .table-row .table-elem button {
     font-size: 20px;
-    border: 0px;
+    border: none;
+    height: 170px;
+    width:170px;
     color: #000000 !important;
     background: #ffffff !important;
     text-transform: none;
     box-sizing: border-box;
 }
 
-.table .table-row a:hover {
+.table .table-row button:hover {
     color: #ffffff !important;
     background: #000000 !important;
 }
