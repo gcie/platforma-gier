@@ -237,7 +237,7 @@ socket.on('move-error', function(data) {
     window.alert(data);
 });
 
-socket.on('opponent-nick', function(data) {
+socket.on('opponentnick', function(data) {
     opponentnick = data;
     document.getElementById('opponentnick').innerText = opponentnick; 
 });
