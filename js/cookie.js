@@ -80,6 +80,7 @@ module.exports = ({
             res.cookie('user', '', {maxAge : -1});
             res.redirect('/');
         });
+
         app.post('/login', (req, res) => {
             var user = req.body.username;
             var pwd = req.body.pwd;
@@ -92,7 +93,7 @@ module.exports = ({
                     {
                         res.render('login', { message : 'Incorrect username or password' });
                     } else {
-                        res.cookie('user', result.login + '&' + result.username + '&' + result.password + '&' + result.wins + '&' + result.losses + '&' + result.draws, {signed : true});
+                        res.cookie('user', result.login + '&' + result.username + '&' + pwd + '&' + result.wins + '&' + result.losses + '&' + result.draws, {signed : true});
                         res.redirect('/');
                     }
                 });
@@ -138,8 +139,7 @@ module.exports = ({
             if(allowedUsername(req.body.username))
             {
                 var ident = ID();
-                console.log(ident);
-                res.cookie('user', ident + '&' + req.username, {signed:true});
+                res.cookie('user', ident + '&' + req.body.username, {signed:true});
                 res.redirect('/');
             } else {
                 res.render('anonymous', {message :'Nickname should have from 6 to 20 symbols containing letters from english alphabet or numbers'})

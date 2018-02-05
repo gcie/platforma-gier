@@ -31,13 +31,17 @@ var server = http.createServer(app);
 var io = require('socket.io')(server);
 cookies.init(io, app);
 
-app.get('/', (req, res) => {
-    res.render('app');
+app.get('/', cookies.authorize, (req, res) => {
+    res.render('app', req.user);
 });
 
 app.post('/post', (req, res) => {
     res.end(`z serwera ${new Date().toLocaleTimeString()}`);
 })
+
+app.get('/mystats', cookies.authorize, (req,res) =>{
+    res.render('mystats', req.user)
+});
 
 server.listen(3000);
 
