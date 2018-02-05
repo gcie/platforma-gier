@@ -13,7 +13,7 @@ var checkers = require('./checkers.js');
 var cookie = require('./cookie.js');
 var Game = checkers.Game;
 var executeMove = checkers.executeMove;
-var gameState = checkers.gamestate;
+var getState = checkers.getState;
 
 function createTable(hostlogin, hostname) {
     do{ id = token(); }while( TABLEDATA[id] );
@@ -180,6 +180,7 @@ module.exports = function(io, app) {
             // validate move
             executeMove(TABLEDATA[data.id].gamefile, data.move);
             var state = getState(TABLEDATA[data.id].gamefile);
+            console.log(state);
             if(state.finished) {
                 if(state.won == TABLEDATA[data.id].hostcolor) {
                     // host won

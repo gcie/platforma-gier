@@ -302,7 +302,7 @@ function executeMove(game, move) {
 function getState(game) {
     var white = true;
     var black = true;
-    for(var i = 0; i < game.pieces.size; i++) {
+    for(var i = 0; i < game.pieces.length; i++) {
         if(game.pieces[i].color) black = false;
         if(!game.pieces[i].color) white = false;        
     }
@@ -314,5 +314,6 @@ module.exports = {
     getMoves,
     getCaptures,
     validateMove,
-    executeMove
+    executeMove,
+    getState
 }
