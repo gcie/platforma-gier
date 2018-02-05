@@ -144,6 +144,7 @@ function getCaptures(piece) {
 
 var GAME;   
 var BOARD;
+var guestdata, hostdata;
 
 /**
  * funkcje do renderowania widoku gry
@@ -234,6 +235,9 @@ socket.on('move-error', function(data) {
 
 window.onload = function() {
     BOARD = document.getElementById('board');
+    document.getElementById('mynick').innerText = mynick;
+    document.getElementById('opponentnick').innerText = opponentnick;
+
     document.getElementById('bt-leave').onclick = function() {
         socket.emit('disconnect ' + seat, {id: id, name: mynick, pass: pass});
         window.location.href = "/";

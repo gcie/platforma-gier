@@ -165,14 +165,14 @@ module.exports = function(io, app) {
 
         socket.on('disconnect guest', function(data) {
             if(TABLEDATA[data.id] && TABLEDATA[data.id].guestpass == data.pass) {
-                TABLEDATA[data.id].hostsocket.emit('game-end', {msg:'Your opponent left!'});
+                if(TABLEDATA[data.id].hostsocket) TABLEDATA[data.id].hostsocket.emit('game-end', {msg:'Your opponent left!'});
                 delete TABLEDATA[data.id];
             }
         });
         
         socket.on('disconnect host', function(data) {
             if(TABLEDATA[data.id] && TABLEDATA[data.id].hostpass == data.pass) {
-                TABLEDATA[data.id].guestsocket.emit('game-end', {msg: 'Your opponent left!'});
+                if(TABLEDATA[data.id].guestsocket) TABLEDATA[data.id].guestsocket.emit('game-end', {msg: 'Your opponent left!'});
                 delete TABLEDATA[data.id];
             }
         });
