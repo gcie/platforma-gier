@@ -10,6 +10,7 @@
 var token = require("./token.js");
 const url = require('url');
 var checkers = require('./checkers.js');
+var cookie = require('./cookie.js');
 var Game = checkers.Game;
 var executeMove = checkers.executeMove;
 
@@ -83,8 +84,8 @@ module.exports = function(io, app) {
     var tables = io.of('/tables');
     var games = io.of('/games');
 
-    app.get('/tables', (req, res) => {
-        res.render('tables');
+    app.get('/tables', cookie.authorize, (req, res) => {
+        res.render('tables', { nick: req.user.username, login: req.user.login });
     });
 
     app.post('/tables/create', (req, res) => { // creating new table
@@ -98,9 +99,9 @@ module.exports = function(io, app) {
         }
     });
     
-    app.post('/tables/join', (req, res) => { // joining an existing table
+    app.post('/tables/join', cookie.authorize, (req, res) => { // joining an existing table
         var id = req.body.id;
-        if(joinTable(id, 'mother', 'fucker'/*req.cookies.username, req.cookies.nickname*/)) {
+        if(joinTable(id, req.user.login, req.user.username)) {
             res.send({id: id, pass: TABLEDATA[id].guestpass });
             tables.emit('update-list', converttables());
         } else {
