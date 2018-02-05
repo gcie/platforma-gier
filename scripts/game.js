@@ -220,9 +220,15 @@ socket.on('connect response', function(data) {
 socket.on('gamestate', function(data) {
     GAME = data;
     render();
-})
+});
+
+socket.on('game-end', function(data) {
+    setTimeout(() => {
+        window.location.href = data ? '/victory' : '/defeat';
+    }, 3000);
+});
 
 window.onload = function() {
     BOARD = document.getElementById('board');
-    socket.emit('connect ' + seat, {id: id, nick: mynick, pass: pass});
+    socket.emit('connect ' + seat, {id: id, name: mynick, pass: pass});
 }

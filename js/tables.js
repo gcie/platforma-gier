@@ -13,13 +13,14 @@ var checkers = require('./checkers.js');
 var cookie = require('./cookie.js');
 var Game = checkers.Game;
 var executeMove = checkers.executeMove;
+var gameState = checkers.gamestate;
 
-function createTable(hostname, hostnick) {
+function createTable(hostlogin, hostname) {
     do{ id = token(); }while( TABLEDATA[id] );
     var gameclass = new Game(8, 8, 3);
     TABLEDATA[id] = {
+        hostlogin: hostlogin,
         hostname: hostname,
-        hostnick: hostnick,
         gametype: "Classic 8x8",
         hostcolor: (Math.random() < 0.5),
         hostpass: token(),
@@ -28,11 +29,11 @@ function createTable(hostname, hostnick) {
     return id;
 }
 
-function joinTable(id, guestname, guestnick) {
+function joinTable(id, guestlogin, guestname) {
     if(TABLEDATA[id] && !TABLEDATA[id].guestpass) { // table exists & there is no second player yet
         TABLEDATA[id].guestpass = token();                    
+        TABLEDATA[id].guestlogin = guestlogin;
         TABLEDATA[id].guestname = guestname;
-        TABLEDATA[id].guestnick = guestnick;
         return true;
     } else {
         return false;
@@ -41,12 +42,12 @@ function joinTable(id, guestname, guestnick) {
 
 var TABLEDATA = {
     table1_id: {
-        hostname: 'sdfRambo', // nazwa użytkownika hosta
-        hostnick: 'Rambo',
+        hostlogin: 'sdfRambo', // nazwa użytkownika hosta
+        hostname: 'Rambo',
         hostpass: 'host#gf748238d89a9f7',
         hostsocket: 'fr23r32vgjfxr23ar',
+        guestlogin: undefined,
         guestname: undefined,
-        guestnick: undefined,
         guestpass: undefined,
         guestsocket: undefined,
         gametype: 'Classic 8x8', // rodzaj gry
@@ -54,12 +55,12 @@ var TABLEDATA = {
         hostcolor: true
     },
     table2_id: {
-        hostname: 'xxX_69Anthony69_Xxx',
-        hostnick: 'Anthony',
+        hostlogin: 'xxX_69Anthony69_Xxx',
+        hostname: 'Anthony',
         hostpass: 'host#r3y89quda9dfuaf',
         hostsocket: 'rqi2h93r8h8rj',
+        guestlogin: undefined,
         guestname: undefined,
-        guestnick: undefined,
         guestpass: undefined,
         guestsocket: undefined,
         gametype: 'Classic 10x10',
@@ -72,8 +73,8 @@ function converttables() {
     var data = {};
     for(var id in TABLEDATA) {
         data[id] = {
-            hostnick: TABLEDATA[id].hostnick,
-            guestnick: TABLEDATA[id].guestnick,
+            hostname: TABLEDATA[id].hostname,
+            guestname: TABLEDATA[id].guestname,
             //gametype: tables[id].gamefile.desc
         }
     }
@@ -85,14 +86,14 @@ module.exports = function(io, app) {
     var games = io.of('/games');
 
     app.get('/tables', cookie.authorize, (req, res) => {
-        res.render('tables', { nick: req.user.username, login: req.user.login });
+        res.render('tables');
     });
 
     app.post('/tables/create', cookie.authorize, (req, res) => { // creating new table
         if(/* !data.gamedata || */ false) { // data incomplete
             res.send({err: 'Incomplete data'});
         } else {
-            var id = createTable(req.user.login, req.user.nick);
+            var id = createTable(req.user.login, req.user.username);
             res.send({ id: id, pass: TABLEDATA[id].hostpass });
             tables.emit('update-list', converttables());
         }
@@ -114,8 +115,8 @@ module.exports = function(io, app) {
         if(TABLEDATA[id]) {
             if(TABLEDATA[id].hostpass == pass) {
                 res.render('game', {
-                    mynick: TABLEDATA[id].hostnick,
-                    opponentnick: TABLEDATA[id].guestnick,
+                    mynick: TABLEDATA[id].hostname,
+                    opponentnick: TABLEDATA[id].guestname,
                     seat: 'host',
                     color: TABLEDATA[id].hostcolor,
                     pass: pass,
@@ -123,8 +124,8 @@ module.exports = function(io, app) {
                 });             
             } else if(TABLEDATA[id].guestpass == pass) {
                 res.render('game', {
-                    mynick: TABLEDATA[id].guestnick,
-                    opponentnick: TABLEDATA[id].hostnick,
+                    mynick: TABLEDATA[id].guestname,
+                    opponentnick: TABLEDATA[id].hostname,
                     seat: 'guest',
                     color: !TABLEDATA[id].hostcolor,
                     pass: pass,
@@ -132,8 +133,8 @@ module.exports = function(io, app) {
                 });   
             } else {
                 res.render('game', {
-                    hostnick: TABLEDATA[id].hostnick,
-                    guestnick: TABLEDATA[id].guestnick,
+                    mynick: TABLEDATA[id].hostname,
+                    opponentnick: TABLEDATA[id].guestname,
                     seat: 'spectator'
                 });
             }
@@ -155,17 +156,17 @@ module.exports = function(io, app) {
 
     games.on('connection', function(socket) {
         socket.on('connect host', function(data) {
-            if(TABLEDATA[data.id] && TABLEDATA[data.id].hostnick == data.nick && TABLEDATA[data.id].hostpass == data.pass) {
+            if(TABLEDATA[data.id] && TABLEDATA[data.id].hostname == data.name && TABLEDATA[data.id].hostpass == data.pass) {
                 TABLEDATA[data.id].hostsocket = socket;
                 socket.emit('connect response', {success: true});
                 socket.emit('gamestate', TABLEDATA[data.id].gamefile);
-            } else {                
+            } else {
                 socket.emit('connect response', {success: false});
             }
         });
 
         socket.on('connect guest', function(data) {
-            if(TABLEDATA[data.id] && TABLEDATA[data.id].guestnick == data.nick && TABLEDATA[data.id].guestpass == data.pass) {
+            if(TABLEDATA[data.id] && TABLEDATA[data.id].guestname == data.name && TABLEDATA[data.id].guestpass == data.pass) {
                 TABLEDATA[data.id].guestsocket = socket;
                 socket.emit('connect response', {success: true});
                 socket.emit('gamestate', TABLEDATA[data.id].gamefile);
@@ -178,8 +179,19 @@ module.exports = function(io, app) {
         socket.on('move', function(data) {
             // validate move
             executeMove(TABLEDATA[data.id].gamefile, data.move);
+            var state = getState(TABLEDATA[data.id].gamefile);
+            if(state.finished) {
+                if(state.won == TABLEDATA[data.id].hostcolor) {
+                    // host won
+                    TABLEDATA[data.id].hostsocket.emit('game-end', true);
+                    TABLEDATA[data.id].guestsocket.emit('game-end', false);
+                } else {
+                    // guest won
+                    TABLEDATA[data.id].hostsocket.emit('game-end', false);
+                    TABLEDATA[data.id].guestsocket.emit('game-end', true);
+                }
+            }
             if(TABLEDATA[data.id].guestpass == data.pass || TABLEDATA[data.id].hostpass == data.pass) {
-                console.log('success');
                 TABLEDATA[data.id].hostsocket.emit('gamestate', TABLEDATA[data.id].gamefile);
                 TABLEDATA[data.id].guestsocket.emit('gamestate', TABLEDATA[data.id].gamefile);
             }
