@@ -5,7 +5,28 @@
 	<link rel="stylesheet" href="../styles/css/bootstrap.css">
 	<link rel="stylesheet" href="../styles/css/superfish.css">
     <link rel="stylesheet" href="../styles/css/draughts.css">
-    <script src='../scripts/tables.js'></script>
+    <script>
+    function createTable(gametype) {
+        var req = new XMLHttpRequest();
+
+        req.open('post', '/tables/create');
+        req.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+        req.send(`gametype=${gametype}`);
+
+        req.onreadystatechange = function() {
+            if(req.readyState == XMLHttpRequest.DONE) {
+                var data = JSON.parse(req.response);
+                if(data.err || !data.id || !data.pass) {
+                    console.log(data.err);
+                } else {
+                    window.localStorage.setItem('currentGameId', data.id);
+                    window.localStorage.setItem('currentGamePass', data.pass);
+                    window.location.href = '/tables/' + data.id + "?p=" + data.pass;
+                }
+            }
+        };
+    }
+    </script>
 </head>
 <body>
     <div id="header">
@@ -18,8 +39,10 @@
                             <li>
                                 <a><%= username.toUpperCase()%></a>
                                 <ul class="sub-menu">
-                                    <li><a href = '/mystats'>Statistics</a></li>
-                                    <li><a>My account</a></li>
+                                    <% if(locals.login.charAt(0) != '@') { %>
+                                        <li><a href = '/mystats'>Statistics</a></li>
+                                        <li><a>My account</a></li>
+                                    <% } %>
                                     <li><a href = '/logout'>Log out</a></li>
                                 </ul>
                             </li>
@@ -54,9 +77,11 @@
 				</button>
 			</div>
 			<div class="table-elem">
-				<button href = '/tables' >
-					Tables
-				</button>
+                <form method="get" action="/tables">
+                    <button type ='submit'>
+                        Tables
+                    </button>
+                </form>
 			</div>
 			<div class="table-elem">
 				<button onclick = createTable("english10x10")>
