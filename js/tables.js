@@ -1,7 +1,3 @@
-import { raw } from "./C:/Users/grzec.DESKTOP-HPIK33A/AppData/Local/Microsoft/TypeScript/2.6/node_modules/@types/body-parser";
-
-// import * as http from "http" // zaremować przed uruchomieniem
-
 /**
  * 
  * @param {http.IncomingMessage} req 
