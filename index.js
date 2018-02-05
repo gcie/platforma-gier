@@ -9,6 +9,7 @@
 const http = require('http');
 const ejs = require('ejs');
 const express = require('express'); 
+const PORT = process.env.PORT || 3000;
 
 //const checkers = require('./checkers.js');
 
@@ -43,7 +44,7 @@ app.get('/mystats', cookies.authorize, (req,res) =>{
     res.render('mystats', req.user)
 });
 
-server.listen(3000);
+server.listen(PORT);
 
 console.log("Server started!");
 

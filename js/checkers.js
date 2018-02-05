@@ -177,7 +177,7 @@ function getPieceId(game, x, y) {
 
 function getPiece(game, x, y) {
     var id = getPieceId(game, x, y);
-    return id ? game.pieces[id] : undefined;
+    return id != undefined ? game.pieces[id] : undefined;
 }
 
 function isFree(game, x, y) {
