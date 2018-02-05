@@ -11,15 +11,6 @@ const cn = 'postgres://postgres:dawid@localhost:5432/postgres';
 const db = pgp(cn);
 const bcrypt = require('bcrypt');
 
-function * gener() {
-    var a = 1000; 
-    while(true)
-    {
-        yield a++;
-    }
-}
-
-let gen = gener;
 
 module.exports = ({
     authorize : function (req,res,next) {
