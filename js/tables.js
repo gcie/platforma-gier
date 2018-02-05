@@ -145,6 +145,7 @@ module.exports = function(io, app) {
         socket.on('connect host', function(data) {
             if(TABLEDATA[data.id] && TABLEDATA[data.id].hostname == data.name && TABLEDATA[data.id].hostpass == data.pass) {
                 TABLEDATA[data.id].hostsocket = socket;
+                if(TABLEDATA[data.id].guestsocket) TABLEDATA[data.id].guestsocket.emit('opponentnick', data.name);                
                 socket.emit('connect response', {success: true});
                 socket.emit('gamestate', TABLEDATA[data.id].gamefile);
             } else {
@@ -155,6 +156,7 @@ module.exports = function(io, app) {
         socket.on('connect guest', function(data) {
             if(TABLEDATA[data.id] && TABLEDATA[data.id].guestname == data.name && TABLEDATA[data.id].guestpass == data.pass) {
                 TABLEDATA[data.id].guestsocket = socket;
+                if(TABLEDATA[data.id].hostsocket) TABLEDATA[data.id].hostsocket.emit('opponentnick', data.name);
                 socket.emit('connect response', {success: true});
                 socket.emit('gamestate', TABLEDATA[data.id].gamefile);
             } else {                

@@ -145,7 +145,7 @@ function getCaptures(piece) {
 var GAME;   
 var BOARD;
 var guestdata, hostdata;
-
+var end = false;
 /**
  * funkcje do renderowania widoku gry
  */
@@ -224,14 +224,23 @@ socket.on('gamestate', function(data) {
 });
 
 socket.on('game-end', function(data) {
+    end = true;
     setTimeout(() => {
         window.alert(data.msg);
     }, 1000);
+    setTimeout(() => {
+        window.location.href = "/";
+    }, 5000);
 });
 
 socket.on('move-error', function(data) {
     window.alert(data);
-})
+});
+
+socket.on('opponent-nick', function(data) {
+    opponentnick = data;
+    document.getElementById('opponentnick').innerText = opponentnick; 
+});
 
 window.onload = function() {
     BOARD = document.getElementById('board');
@@ -239,6 +248,7 @@ window.onload = function() {
     document.getElementById('opponentnick').innerText = opponentnick;
 
     document.getElementById('bt-leave').onclick = function() {
+        end = true;
         socket.emit('disconnect ' + seat, {id: id, name: mynick, pass: pass});
         window.location.href = "/";
     }
@@ -246,7 +256,7 @@ window.onload = function() {
 }
 
 window.onbeforeunload = function(e) {
-    e.returnValue = "Hello!";
+    if(!end) e.returnValue = "Game still goes!";
 }
 
 window.onunload = function() {
