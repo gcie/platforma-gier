@@ -88,12 +88,11 @@ module.exports = function(io, app) {
         res.render('tables', { nick: req.user.username, login: req.user.login });
     });
 
-    app.post('/tables/create', (req, res) => { // creating new table
-        var data = req.body;
-        if(/* !data.gamedata || */ !data.hostnick) { // data incomplete
+    app.post('/tables/create', cookie.authorize, (req, res) => { // creating new table
+        if(/* !data.gamedata || */ false) { // data incomplete
             res.send({err: 'Incomplete data'});
         } else {
-            var id = createTable(data.hostnick, data.hostnick);
+            var id = createTable(req.user.login, req.user.nick);
             res.send({ id: id, pass: TABLEDATA[id].hostpass });
             tables.emit('update-list', converttables());
         }

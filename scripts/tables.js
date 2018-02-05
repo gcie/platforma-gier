@@ -46,7 +46,7 @@ function createTable() {
 
     req.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
 
-    req.send(`gamedata=null&hostnick=${nick}&hostname=${login}`);
+    req.send(`gamedata=null`);
 
     req.onreadystatechange = function() {
         if(req.readyState == XMLHttpRequest.DONE) {
