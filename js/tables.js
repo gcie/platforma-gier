@@ -69,7 +69,7 @@ module.exports = function(io, app) {
     var games = io.of('/games');
 
     app.get('/tables', cookie.authorize, (req, res) => {
-        res.render('tables');
+        res.render('tables', {username: req.user.username, login: req.user.login});
     });
 
     app.post('/tables/create', cookie.authorize, (req, res) => { // creating new table
@@ -183,6 +183,7 @@ module.exports = function(io, app) {
         });
 
         socket.on('connect spectator', function(data) {
+            console.log('spectator');
             TABLEDATA[data.id].spectatorsockets.push(socket);      
             socket.emit('gamestate', TABLEDATA[data.id].gamefile);
         });

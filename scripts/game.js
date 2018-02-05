@@ -230,5 +230,10 @@ socket.on('game-end', function(data) {
 
 window.onload = function() {
     BOARD = document.getElementById('board');
+    document.getElementById('bt-leave').onclick = function() {
+        socket.emit('disconnect ' + seat);
+        window.location.href = "/";
+    }
+    console.log('connect ' + seat);
     socket.emit('connect ' + seat, {id: id, name: mynick, pass: pass});
 }
