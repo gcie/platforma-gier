@@ -1,55 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta charset="utf-8">
+    <title>MyDraughts</title>
+    <link rel="stylesheet" href="../styles/css/bootstrap.css">
+    <link rel="stylesheet" href="../styles/css/superfish.css">
+    <link rel="stylesheet" href="../styles/css/draughts.css">
     <script src="/socket.io/socket.io.js"></script>
     <script>
         var nick = '<%= locals.nick %>';
         var login = '<%= locals.login %>';
     </script>
     <script src="../scripts/tables.js"></script>
-    <title>Document</title>
 </head>
 <body>
     <table id='tables'>
-    </table>
-    </br>
-    <table>
-        <tr>
-            <td colspan=2>
-                <div align="center">Nowy stół:</div>
-            </td>
-        </tr>
-        <tr>
-            <th>Rodzaj gry:</th>
-            <td>
-                <select id="in-gametype">
-                    <option value="classic8">Classic 8x8</option>
-                    <option value="classic10">Classic 10x10</option>
-                    <option value="english8">English 8x8</option>
-                    <option value="english10">English 10x10</option>
-                    <option value="russian8">Russian 8x8</option>
-                    <option value="russian10">Russian 10x10</option>
-                </select>
-            </td>
-        </tr>
-        <tr>
-            <th>Login gracza:</th>
-            <th><input type="text" id="in-hostname"></th>
-        </tr>
-        <tr>
-            <th>Nick gracza:</th>
-            <th><input type="text" id="in-hostnick"></th>
-        </tr>
-        <tr>
-            <td colspan=2>
-                <div align="center">
-                    <button id='bt-create'>Utwórz stół</button>
-                </div>
-            </td>
-        </tr>
-    </table>
+    </table>    
 </body>
 </html>
